@@ -18,14 +18,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen">
         <Toaster
-          position="bottom-right"
+          position="bottom-center"
           toastOptions={{
             className: "toast-custom",
             duration: 3000,
             style: {
-              borderRadius: "12px",
-              padding: "12px 16px",
+              borderRadius: "14px",
+              padding: "12px 20px",
               fontSize: "14px",
+              fontWeight: 500,
+              background: "#2A2520",
+              color: "#F5F0E8",
+              border: "1px solid #4D4437",
             },
           }}
         />

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   * {
@@ -10,8 +10,25 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-surface-50 text-ink-950 dark:bg-ink-950 dark:text-surface-100 antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  .dark body::before {
+    opacity: 0.04;
   }
 
   /* Custom scrollbar */
@@ -22,10 +39,10 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+    @apply bg-surface-300 dark:bg-ink-700 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400 dark:bg-slate-600;
+    @apply bg-surface-400 dark:bg-ink-600;
   }
 }
 
@@ -37,7 +54,7 @@
 
   .card-flip {
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-flip.flipped {
@@ -54,50 +71,54 @@
     transform: rotateY(180deg);
   }
 
-  /* Glass morphism effect */
+  /* Glass morphism */
   .glass {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl;
+    @apply bg-surface-50/85 dark:bg-ink-950/90 backdrop-blur-2xl;
   }
 
-  /* Gradient text */
+  /* Gradient text — warm editorial */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-500 dark:from-brand-400 dark:to-brand-300;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #E05A2B 0%, #C2412A 50%, #A13024 100%);
+  }
+  .dark .gradient-text {
+    background-image: linear-gradient(135deg, #F49B72 0%, #EE7A4D 50%, #E05A2B 100%);
   }
 
-  /* Smooth modal overlay */
+  /* Modal overlay */
   .modal-overlay {
-    @apply fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4;
-    animation: fadeIn 0.2s ease-out;
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: rgba(26, 23, 20, 0.6);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.15s ease-out;
+  }
+  .dark .modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
   }
 
   .modal-content {
-    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Difficulty badges */
+  /* Difficulty badges — warm tonal */
   .badge-easy {
-    @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-500/20;
+    @apply bg-sage-50 text-sage-700 dark:bg-sage-900/30 dark:text-sage-300 font-semibold;
   }
   .badge-medium {
-    @apply bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-500/20;
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold;
   }
   .badge-hard {
-    @apply bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-500/20;
+    @apply bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300 font-semibold;
   }
 
-  /* Shimmer loading effect */
+  /* Shimmer */
   .shimmer {
     @apply relative overflow-hidden;
   }
   .shimmer::after {
     content: '';
     @apply absolute inset-0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.08),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
     animation: shimmer 2s infinite;
   }
 
@@ -107,7 +128,7 @@
   }
 
   @keyframes scaleIn {
-    0% { opacity: 0; transform: scale(0.95); }
+    0% { opacity: 0; transform: scale(0.96); }
     100% { opacity: 1; transform: scale(1); }
   }
 
@@ -116,30 +137,46 @@
     100% { opacity: 1; }
   }
 
-  /* Input focus ring */
-  .input-base {
-    @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:focus:ring-brand-400/20 dark:focus:border-brand-400;
+  /* Shared input styles */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm transition-all duration-200;
+    @apply bg-white dark:bg-ink-900 text-ink-950 dark:text-surface-100;
+    @apply border border-surface-200 dark:border-ink-800;
+    @apply placeholder:text-surface-400 dark:placeholder:text-ink-500;
+    @apply focus:outline-none focus:border-accent-400 dark:focus:border-accent-500 focus:ring-2 focus:ring-accent-500/10;
   }
 
-  /* Button base styles */
+  /* Shared button styles */
   .btn-primary {
-    @apply px-4 py-2.5 rounded-xl bg-brand-600 text-white font-medium text-sm;
-    @apply hover:bg-brand-700 active:scale-[0.98] transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm cursor-pointer;
+    @apply bg-accent-600 text-white;
+    @apply hover:bg-accent-700 active:scale-[0.97] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:ring-offset-2 focus:ring-offset-surface-50 dark:focus:ring-offset-ink-950;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .btn-secondary {
-    @apply px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-sm;
-    @apply hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-slate-300/40 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm cursor-pointer;
+    @apply bg-white dark:bg-ink-900 text-ink-800 dark:text-surface-200;
+    @apply border border-surface-200 dark:border-ink-700;
+    @apply hover:bg-surface-100 dark:hover:bg-ink-800 active:scale-[0.97] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-surface-300/40 focus:ring-offset-2;
   }
 
   .btn-danger {
-    @apply px-4 py-2.5 rounded-xl bg-rose-500 text-white font-medium text-sm;
-    @apply hover:bg-rose-600 active:scale-[0.98] transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm cursor-pointer;
+    @apply bg-accent-600 text-white;
+    @apply hover:bg-accent-700 active:scale-[0.97] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:ring-offset-2;
+  }
+
+  /* Decorative dot grid */
+  .dot-grid {
+    background-image: radial-gradient(circle, #C4B9A4 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+  }
+  .dark .dot-grid {
+    background-image: radial-gradient(circle, #4D4A50 0.5px, transparent 0.5px);
   }
 
   /* Toast overrides */
