@@ -45,9 +45,6 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
     <div className="max-w-xl mx-auto">
       {/* Hero */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-600 mb-5 animate-float shadow-warm-lg">
-          <Sparkles className="w-7 h-7 text-white" />
-        </div>
         <h2 className="font-display text-3xl sm:text-4xl italic text-ink-950 dark:text-surface-50 mb-3">
           Generate with AI
         </h2>

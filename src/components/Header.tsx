@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sun, Moon, Sparkles, BookOpen, GraduationCap, Wand2 } from "lucide-react";
+import { Sun, Moon, BookOpen, GraduationCap, Wand2 } from "lucide-react";
 
 interface HeaderProps {
   activeTab: string;
@@ -43,10 +43,6 @@ export default function Header({ activeTab, onTabChange, cardCount }: HeaderProp
             <h1 className="font-display text-2xl italic text-ink-950 dark:text-surface-50 tracking-tight">
               Flash<span className="gradient-text not-italic">Mind</span>
             </h1>
-            <div className="hidden sm:flex items-center gap-1 text-[11px] text-surface-500 dark:text-ink-400 bg-surface-100 dark:bg-ink-900 px-2.5 py-1 rounded-full font-medium tracking-wide uppercase">
-              <Sparkles className="w-3 h-3" />
-              AI
-            </div>
           </div>
 
           {/* Right side */}

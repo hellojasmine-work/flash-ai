@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Loader2, MessageCircle, X } from "lucide-react";
 import type { Flashcard, Note } from "@/hooks/useFlashcards";
 
 interface DiscussPanelProps {
   card: Flashcard;
   onDiscuss: (cardId: string, message: string) => Promise<Flashcard>;
-  onClose: () => void;
+  onClose: (cardId: string, notes: Note[]) => void;
 }
 
 /**
  * Discussion panel for chatting with AI about a flashcard.
- * The explanation (if any) appears as the first assistant message.
- * All messages are persisted as notes on the card.
+ * Manages its own notes state to avoid re-rendering the parent card grid.
+ * Syncs notes back to global state only on close.
  */
 export default function DiscussPanel({ card, onDiscuss, onClose }: DiscussPanelProps) {
   const [message, setMessage] = useState("");
@@ -42,6 +42,10 @@ export default function DiscussPanel({ card, onDiscuss, onClose }: DiscussPanelP
     inputRef.current?.focus();
   }, []);
 
+  const handleClose = useCallback(() => {
+    onClose(card._id, notes);
+  }, [card._id, notes, onClose]);
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || sending) return;
@@ -52,7 +56,8 @@ export default function DiscussPanel({ card, onDiscuss, onClose }: DiscussPanelP
     setSending(true);
 
     // Optimistically add user message
-    setNotes((prev) => [...prev, { role: "user", content: userMsg, createdAt: new Date().toISOString() }]);
+    const optimisticNote: Note = { role: "user", content: userMsg, createdAt: new Date().toISOString() };
+    setNotes((prev) => [...prev, optimisticNote]);
 
     try {
       const updated = await onDiscuss(card._id, userMsg);
@@ -71,7 +76,7 @@ export default function DiscussPanel({ card, onDiscuss, onClose }: DiscussPanelP
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       style={{ background: "rgba(26, 23, 20, 0.6)", backdropFilter: "blur(8px)" }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="w-full sm:max-w-lg bg-white dark:bg-ink-900 sm:rounded-2xl rounded-t-2xl shadow-warm-xl border border-surface-200/60 dark:border-ink-800 flex flex-col max-h-[85vh] sm:max-h-[600px] animate-slide-up"
@@ -93,7 +98,7 @@ export default function DiscussPanel({ card, onDiscuss, onClose }: DiscussPanelP
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-full flex items-center justify-center text-surface-400 hover:text-ink-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-ink-800 transition-all cursor-pointer"
             aria-label="Close discussion"
           >

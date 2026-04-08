@@ -135,7 +135,8 @@ export function useFlashcards() {
     return json.data;
   };
 
-  // Discuss a flashcard with AI — sends a message, returns the updated card with new notes
+  // Send a discuss message — only returns updated card, does NOT update global state
+  // This avoids re-rendering the entire card grid on every chat message.
   const discussWithAI = async (
     id: string,
     message: string
@@ -147,12 +148,14 @@ export function useFlashcards() {
     });
     const json = await res.json();
     if (!json.success) throw new Error(json.error);
-
-    // Update card in local state with new notes
-    setFlashcards((prev) =>
-      prev.map((card) => (card._id === id ? json.data : card))
-    );
     return json.data;
+  };
+
+  // Sync a card's notes back into global state (call when closing discuss panel)
+  const syncCardNotes = (id: string, notes: Note[]) => {
+    setFlashcards((prev) =>
+      prev.map((card) => (card._id === id ? { ...card, notes } : card))
+    );
   };
 
   // Get unique categories from existing flashcards
@@ -177,6 +180,7 @@ export function useFlashcards() {
     deleteFlashcard,
     generateWithAI,
     discussWithAI,
+    syncCardNotes,
     refetch: fetchFlashcards,
   };
 }

@@ -25,6 +25,7 @@ export default function Home() {
     deleteFlashcard,
     generateWithAI,
     discussWithAI,
+    syncCardNotes,
   } = useFlashcards();
 
   const [activeTab, setActiveTab] = useState("cards");
@@ -90,10 +91,12 @@ export default function Home() {
   };
 
   const handleDiscussMessage = async (cardId: string, message: string) => {
-    const updated = await discussWithAI(cardId, message);
-    // Keep the discuss panel in sync with latest card data
-    setDiscussCard(updated);
-    return updated;
+    return await discussWithAI(cardId, message);
+  };
+
+  const handleDiscussClose = (cardId: string, notes: import("@/hooks/useFlashcards").Note[]) => {
+    syncCardNotes(cardId, notes);
+    setDiscussCard(null);
   };
 
   const hasActiveFilters = filters.category !== "all" || filters.difficulty !== "all";
@@ -331,7 +334,7 @@ export default function Home() {
         <DiscussPanel
           card={discussCard}
           onDiscuss={handleDiscussMessage}
-          onClose={() => setDiscussCard(null)}
+          onClose={handleDiscussClose}
         />
       )}
 
