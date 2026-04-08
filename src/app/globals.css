@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 antialiased;
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
@@ -22,14 +22,17 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
   }
 }
 
 @layer components {
   /* Card flip animation */
   .perspective {
-    perspective: 1000px;
+    perspective: 1200px;
   }
 
   .card-flip {
@@ -53,33 +56,33 @@
 
   /* Glass morphism effect */
   .glass {
-    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl;
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl;
   }
 
   /* Gradient text */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-brand-500 dark:from-brand-400 dark:to-brand-300;
   }
 
   /* Smooth modal overlay */
   .modal-overlay {
-    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+    @apply fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4;
     animation: fadeIn 0.2s ease-out;
   }
 
   .modal-content {
-    animation: slideUp 0.3s ease-out;
+    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Difficulty badges */
   .badge-easy {
-    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+    @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-500/20;
   }
   .badge-medium {
-    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+    @apply bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-500/20;
   }
   .badge-hard {
-    @apply bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400;
+    @apply bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-500/20;
   }
 
   /* Shimmer loading effect */
@@ -92,7 +95,7 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.08),
       transparent
     );
     animation: shimmer 2s infinite;
@@ -101,6 +104,42 @@
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
+  }
+
+  @keyframes scaleIn {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  /* Input focus ring */
+  .input-base {
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:focus:ring-brand-400/20 dark:focus:border-brand-400;
+  }
+
+  /* Button base styles */
+  .btn-primary {
+    @apply px-4 py-2.5 rounded-xl bg-brand-600 text-white font-medium text-sm;
+    @apply hover:bg-brand-700 active:scale-[0.98] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-sm;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-slate-300/40 focus:ring-offset-2;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2.5 rounded-xl bg-rose-500 text-white font-medium text-sm;
+    @apply hover:bg-rose-600 active:scale-[0.98] transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-rose-500/40 focus:ring-offset-2;
   }
 
   /* Toast overrides */

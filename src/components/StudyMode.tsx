@@ -9,6 +9,8 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Inbox,
+  Trophy,
 } from "lucide-react";
 import type { Flashcard } from "@/hooks/useFlashcards";
 
@@ -77,12 +79,14 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
   // No cards available
   if (flashcards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-5xl mb-4">📭</div>
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+      <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+          <Inbox className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
           No flashcards yet
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
           Create some flashcards first, then come back to study them!
         </p>
       </div>
@@ -93,16 +97,18 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
   if (studyQueue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-        <div className="text-6xl mb-4">🎉</div>
-        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+        <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-5 shadow-sm">
+          <Trophy className="w-10 h-10 text-emerald-500" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
           Session Complete!
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           You&apos;ve studied all {totalCards} flashcard{totalCards !== 1 ? "s" : ""}. Great work!
         </p>
         <button
           onClick={handleReset}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-medium text-sm hover:from-violet-600 hover:to-indigo-700 transition-all flex items-center gap-2"
+          className="btn-primary flex items-center gap-2"
         >
           <RotateCcw className="w-4 h-4" />
           Study Again
@@ -116,16 +122,16 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
             {completed.length} of {totalCards} studied
           </span>
-          <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+          <span className="text-sm font-semibold text-brand-600 dark:text-brand-400">
             {Math.round(progress)}%
           </span>
         </div>
-        <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-violet-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-brand-600 dark:bg-brand-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -133,7 +139,7 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
 
       {/* Card counter */}
       <div className="text-center mb-4">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
           Card {currentIndex + 1} of {studyQueue.length} remaining
         </span>
       </div>
@@ -141,16 +147,16 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
       {/* Study card */}
       <div className="perspective mb-6">
         <div
-          className={`card-flip relative w-full min-h-[300px] cursor-pointer ${
+          className={`card-flip relative w-full min-h-[320px] cursor-pointer ${
             isFlipped ? "flipped" : ""
           }`}
           onClick={handleFlip}
         >
           {/* Front - Question */}
-          <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg p-8 flex flex-col">
+          <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-soft-lg p-8 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <span
-                className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                   currentCard.difficulty === "easy"
                     ? "badge-easy"
                     : currentCard.difficulty === "hard"
@@ -162,37 +168,37 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
               </span>
               <div className="flex items-center gap-2">
                 {currentCard.isAIGenerated && (
-                  <span className="text-xs text-violet-500 flex items-center gap-1">
+                  <span className="text-xs text-brand-500 flex items-center gap-1 font-medium">
                     <Sparkles className="w-3 h-3" /> AI
                   </span>
                 )}
-                <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-slate-500 font-medium bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
                   {currentCard.category}
                 </span>
               </div>
             </div>
 
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-center text-xl font-medium text-gray-800 dark:text-gray-200 leading-relaxed">
+              <p className="text-center text-xl font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
                 {currentCard.question}
               </p>
             </div>
 
-            <p className="text-center text-xs text-gray-400 mt-4">
+            <p className="text-center text-xs text-slate-400 mt-4 font-medium">
               Tap to reveal answer
             </p>
           </div>
 
           {/* Back - Answer */}
-          <div className="card-back absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg p-8 flex flex-col text-white">
+          <div className="card-back absolute inset-0 rounded-2xl bg-brand-600 dark:bg-brand-700 shadow-glow p-8 flex flex-col text-white">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/20">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm">
                 Answer
               </span>
             </div>
 
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-center text-xl font-medium leading-relaxed">
+              <p className="text-center text-xl font-semibold leading-relaxed">
                 {currentCard.answer}
               </p>
             </div>
@@ -204,7 +210,7 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
                     e.stopPropagation();
                     setShowExplanation(!showExplanation);
                   }}
-                  className="w-full flex items-center justify-center gap-1 text-xs text-white/70 hover:text-white transition-colors"
+                  className="w-full flex items-center justify-center gap-1 text-xs text-white/70 hover:text-white transition-colors font-medium"
                 >
                   {showExplanation ? "Hide" : "Show"} explanation
                   {showExplanation ? (
@@ -214,14 +220,14 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
                   )}
                 </button>
                 {showExplanation && (
-                  <div className="mt-2 p-4 bg-white/10 rounded-xl text-sm leading-relaxed animate-slide-down">
+                  <div className="mt-2 p-4 bg-white/10 backdrop-blur-sm rounded-xl text-sm leading-relaxed animate-slide-down">
                     {currentCard.explanation}
                   </div>
                 )}
               </div>
             )}
 
-            <p className="text-center text-xs text-white/40 mt-3">
+            <p className="text-center text-xs text-white/40 mt-3 font-medium">
               Tap to see question
             </p>
           </div>
@@ -233,7 +239,7 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
         <button
           onClick={handlePrev}
           disabled={currentIndex === 0}
-          className="w-11 h-11 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Previous card"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -241,7 +247,7 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
 
         <button
           onClick={handleMarkStudied}
-          className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm transition-all flex items-center gap-2 shadow-sm"
+          className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-medium text-sm transition-all flex items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2"
         >
           <CheckCircle2 className="w-4 h-4" />
           Got it!
@@ -250,7 +256,7 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
         <button
           onClick={handleNext}
           disabled={currentIndex >= studyQueue.length - 1}
-          className="w-11 h-11 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Next card"
         >
           <ChevronRight className="w-5 h-5" />
@@ -258,10 +264,10 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
       </div>
 
       {/* Reset button */}
-      <div className="text-center mt-4">
+      <div className="text-center mt-5">
         <button
           onClick={handleReset}
-          className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center gap-1 mx-auto"
+          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1.5 mx-auto font-medium"
         >
           <RotateCcw className="w-3 h-3" />
           Reset session

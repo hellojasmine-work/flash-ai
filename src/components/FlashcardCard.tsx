@@ -34,45 +34,45 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
         onClick={() => setIsFlipped(!isFlipped)}
       >
         {/* Front - Question */}
-        <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300 p-5 flex flex-col">
+        <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-soft hover:shadow-card-hover transition-all duration-300 p-5 flex flex-col">
           {/* Top badges */}
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${difficultyClass}`}>
+            <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${difficultyClass}`}>
               {card.difficulty}
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {card.isAIGenerated && (
-                <span className="text-[11px] text-violet-500 dark:text-violet-400 flex items-center gap-0.5">
+                <span className="text-[11px] text-brand-500 dark:text-brand-400 flex items-center gap-0.5 font-medium">
                   <Sparkles className="w-3 h-3" />
                   AI
                 </span>
               )}
-              <span className="text-[11px] text-gray-400 dark:text-gray-500 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full truncate max-w-[100px]">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full truncate max-w-[100px] font-medium">
                 {card.category}
               </span>
             </div>
           </div>
 
           {/* Question */}
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-center text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
+          <div className="flex-1 flex items-center justify-center px-2">
+            <p className="text-center text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
               {card.question}
             </p>
           </div>
 
           {/* Hint */}
-          <p className="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">
+          <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-3 font-medium">
             Click to reveal answer
           </p>
 
-          {/* Action buttons (stop propagation to prevent flip) */}
-          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Action buttons */}
+          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(card);
               }}
-              className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all"
+              className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-brand-600 hover:border-brand-300 dark:hover:text-brand-400 dark:hover:border-brand-600 transition-all shadow-sm"
               aria-label="Edit flashcard"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
                 e.stopPropagation();
                 onDelete(card._id);
               }}
-              className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all"
+              className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-300 dark:hover:text-rose-400 dark:hover:border-rose-600 transition-all shadow-sm"
               aria-label="Delete flashcard"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -91,14 +91,14 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
         </div>
 
         {/* Back - Answer */}
-        <div className="card-back absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm hover:shadow-md transition-shadow duration-300 p-5 flex flex-col text-white">
+        <div className="card-back absolute inset-0 rounded-2xl bg-brand-600 dark:bg-brand-700 shadow-soft hover:shadow-glow transition-all duration-300 p-5 flex flex-col text-white">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/20">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
               Answer
             </span>
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center px-2">
             <p className="text-center font-medium leading-relaxed">
               {card.answer}
             </p>
@@ -112,7 +112,7 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
                   e.stopPropagation();
                   setShowExplanation(!showExplanation);
                 }}
-                className="w-full flex items-center justify-center gap-1 text-[11px] text-white/70 hover:text-white transition-colors"
+                className="w-full flex items-center justify-center gap-1 text-[11px] text-white/70 hover:text-white transition-colors font-medium"
               >
                 {showExplanation ? "Hide" : "Show"} explanation
                 {showExplanation ? (
@@ -122,14 +122,14 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
                 )}
               </button>
               {showExplanation && (
-                <div className="mt-2 p-3 bg-white/10 rounded-xl text-xs leading-relaxed animate-slide-down">
+                <div className="mt-2 p-3 bg-white/10 backdrop-blur-sm rounded-xl text-xs leading-relaxed animate-slide-down">
                   {card.explanation}
                 </div>
               )}
             </div>
           )}
 
-          <p className="text-center text-[11px] text-white/50 mt-2">
+          <p className="text-center text-[11px] text-white/40 mt-2 font-medium">
             Click to see question
           </p>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Plus } from "lucide-react";
+import { X, Save, Plus, Loader2 } from "lucide-react";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
 
 interface CreateEditModalProps {
@@ -95,17 +95,23 @@ export default function CreateEditModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-content w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800"
+        className="modal-content w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-soft-xl border border-slate-200/80 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-lg font-semibold">
-            {isEditing ? "Edit Flashcard" : "Create Flashcard"}
-          </h2>
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              {isEditing ? "Edit Flashcard" : "Create Flashcard"}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {isEditing ? "Update your flashcard details" : "Add a new flashcard to your collection"}
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            aria-label="Close modal"
           >
             <X className="w-4 h-4" />
           </button>
@@ -114,14 +120,14 @@ export default function CreateEditModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {errors.form && (
-            <div className="p-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-sm rounded-xl">
+            <div className="p-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm rounded-xl border border-rose-200 dark:border-rose-500/20">
               {errors.form}
             </div>
           )}
 
           {/* Question */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
               Question <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -129,20 +135,18 @@ export default function CreateEditModal({
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Enter your question..."
               rows={2}
-              className={`w-full px-3.5 py-2.5 rounded-xl border ${
-                errors.question
-                  ? "border-rose-300 dark:border-rose-700"
-                  : "border-gray-200 dark:border-gray-700"
-              } bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none text-sm`}
+              className={`input-base resize-none ${
+                errors.question ? "!border-rose-300 dark:!border-rose-700 !ring-rose-500/20" : ""
+              }`}
             />
             {errors.question && (
-              <p className="mt-1 text-xs text-rose-500">{errors.question}</p>
+              <p className="mt-1 text-xs text-rose-500 font-medium">{errors.question}</p>
             )}
           </div>
 
           {/* Answer */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
               Answer <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -150,35 +154,33 @@ export default function CreateEditModal({
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="Enter the answer..."
               rows={2}
-              className={`w-full px-3.5 py-2.5 rounded-xl border ${
-                errors.answer
-                  ? "border-rose-300 dark:border-rose-700"
-                  : "border-gray-200 dark:border-gray-700"
-              } bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none text-sm`}
+              className={`input-base resize-none ${
+                errors.answer ? "!border-rose-300 dark:!border-rose-700 !ring-rose-500/20" : ""
+              }`}
             />
             {errors.answer && (
-              <p className="mt-1 text-xs text-rose-500">{errors.answer}</p>
+              <p className="mt-1 text-xs text-rose-500 font-medium">{errors.answer}</p>
             )}
           </div>
 
           {/* Explanation (optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Explanation <span className="text-gray-400 font-normal">(optional)</span>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Explanation <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <textarea
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               placeholder="Add a detailed explanation..."
               rows={2}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none text-sm"
+              className="input-base resize-none"
             />
           </div>
 
           {/* Category + Difficulty row */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Category <span className="text-rose-500">*</span>
               </label>
               <input
@@ -187,11 +189,9 @@ export default function CreateEditModal({
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g., JavaScript"
                 list="category-list"
-                className={`w-full px-3.5 py-2.5 rounded-xl border ${
-                  errors.category
-                    ? "border-rose-300 dark:border-rose-700"
-                    : "border-gray-200 dark:border-gray-700"
-                } bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all text-sm`}
+                className={`input-base ${
+                  errors.category ? "!border-rose-300 dark:!border-rose-700 !ring-rose-500/20" : ""
+                }`}
               />
               <datalist id="category-list">
                 {existingCategories.map((cat) => (
@@ -199,18 +199,18 @@ export default function CreateEditModal({
                 ))}
               </datalist>
               {errors.category && (
-                <p className="mt-1 text-xs text-rose-500">{errors.category}</p>
+                <p className="mt-1 text-xs text-rose-500 font-medium">{errors.category}</p>
               )}
             </div>
 
             <div className="w-36">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Difficulty
               </label>
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as "easy" | "medium" | "hard")}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all text-sm"
+                className="input-base"
               >
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
@@ -223,10 +223,10 @@ export default function CreateEditModal({
           <button
             type="submit"
             disabled={saving}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-medium text-sm hover:from-violet-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-violet-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+            className="btn-primary w-full flex items-center justify-center gap-2"
           >
             {saving ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : isEditing ? (
               <>
                 <Save className="w-4 h-4" />
