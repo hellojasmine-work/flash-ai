@@ -6,23 +6,22 @@ import {
   ChevronRight,
   RotateCcw,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Sparkles,
   Inbox,
   Trophy,
+  MessageCircle,
 } from "lucide-react";
 import type { Flashcard } from "@/hooks/useFlashcards";
 
 interface StudyModeProps {
   flashcards: Flashcard[];
+  onDiscuss: (card: Flashcard) => void;
 }
 
-export default function StudyMode({ flashcards }: StudyModeProps) {
+export default function StudyMode({ flashcards, onDiscuss }: StudyModeProps) {
   const [studyQueue, setStudyQueue] = useState<Flashcard[]>([...flashcards]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
   const [completed, setCompleted] = useState<string[]>([]);
 
   const currentCard = studyQueue[currentIndex];
@@ -31,12 +30,10 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
 
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
-    setShowExplanation(false);
   }, []);
 
   const handleNext = useCallback(() => {
     setIsFlipped(false);
-    setShowExplanation(false);
     if (currentIndex < studyQueue.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     }
@@ -44,7 +41,6 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
 
   const handlePrev = useCallback(() => {
     setIsFlipped(false);
-    setShowExplanation(false);
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
     }
@@ -56,7 +52,6 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
     const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
     setStudyQueue(newQueue);
     setIsFlipped(false);
-    setShowExplanation(false);
     if (currentIndex >= newQueue.length && newQueue.length > 0) {
       setCurrentIndex(newQueue.length - 1);
     }
@@ -66,7 +61,6 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
     setStudyQueue([...flashcards]);
     setCurrentIndex(0);
     setIsFlipped(false);
-    setShowExplanation(false);
     setCompleted([]);
   }, [flashcards]);
 
@@ -107,6 +101,8 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
       </div>
     );
   }
+
+  const noteCount = currentCard.notes?.length || 0;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -194,29 +190,22 @@ export default function StudyMode({ flashcards }: StudyModeProps) {
               </p>
             </div>
 
-            {currentCard.explanation && (
-              <div className="mt-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowExplanation(!showExplanation);
-                  }}
-                  className="w-full flex items-center justify-center gap-1 text-[11px] text-white/50 dark:text-ink-500 hover:text-white/80 dark:hover:text-ink-700 transition-colors font-medium cursor-pointer"
-                >
-                  {showExplanation ? "Hide" : "Show"} explanation
-                  {showExplanation ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                </button>
-                {showExplanation && (
-                  <div className="mt-2 p-4 bg-white/8 dark:bg-ink-950/8 rounded-xl text-sm leading-relaxed animate-slide-down text-white/80 dark:text-ink-700">
-                    {currentCard.explanation}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <p className="text-center text-[11px] text-white/30 dark:text-ink-400 mt-3 font-medium tracking-wide">
-              tap to flip back
-            </p>
+            {/* Discuss with AI */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDiscuss(currentCard);
+              }}
+              className="mt-3 w-full flex items-center justify-center gap-1.5 text-[12px] font-semibold text-white/60 dark:text-ink-500 hover:text-white dark:hover:text-ink-700 transition-colors cursor-pointer py-2.5 rounded-xl hover:bg-white/5 dark:hover:bg-ink-950/5"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Discuss with AI
+              {noteCount > 0 && (
+                <span className="ml-0.5 text-[10px] bg-white/15 dark:bg-ink-950/10 px-1.5 py-0.5 rounded-full">
+                  {noteCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>

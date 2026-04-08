@@ -1,6 +1,15 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 /**
+ * A single discussion note (message) on a flashcard.
+ */
+export interface INote {
+  role: "user" | "assistant";
+  content: string;
+  createdAt: Date;
+}
+
+/**
  * Flashcard document interface
  */
 export interface IFlashcard extends Document {
@@ -10,9 +19,30 @@ export interface IFlashcard extends Document {
   category: string;
   difficulty: "easy" | "medium" | "hard";
   isAIGenerated: boolean;
+  notes: INote[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const NoteSchema = new Schema<INote>(
+  {
+    role: {
+      type: String,
+      enum: ["user", "assistant"],
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+      maxlength: [5000, "Note cannot exceed 5000 characters"],
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
 
 /**
  * Mongoose schema for Flashcard documents.
@@ -52,6 +82,10 @@ const FlashcardSchema = new Schema<IFlashcard>(
     isAIGenerated: {
       type: Boolean,
       default: false,
+    },
+    notes: {
+      type: [NoteSchema],
+      default: [],
     },
   },
   {

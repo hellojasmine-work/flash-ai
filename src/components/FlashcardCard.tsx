@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Trash2, Sparkles, MessageCircle } from "lucide-react";
 import type { Flashcard } from "@/hooks/useFlashcards";
 
 interface FlashcardCardProps {
   card: Flashcard;
   onEdit: (card: Flashcard) => void;
   onDelete: (id: string) => void;
+  onDiscuss: (card: Flashcard) => void;
 }
 
-export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardProps) {
+export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss }: FlashcardCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
 
   const difficultyClass =
     card.difficulty === "easy"
@@ -20,6 +20,8 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
       : card.difficulty === "hard"
       ? "badge-hard"
       : "badge-medium";
+
+  const noteCount = card.notes?.length || 0;
 
   return (
     <div className="perspective group animate-fade-in">
@@ -33,7 +35,7 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
         <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/80 dark:border-ink-800/80 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-300 p-5 flex flex-col">
           {/* Top badges */}
           <div className="flex items-center justify-between mb-4">
-            <span className={`text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full ${difficultyClass}`}>
+            <span className={`text-[10px] tracking-wide uppercase px-2.5 py-0.5 rounded-full ${difficultyClass}`}>
               {card.difficulty}
             </span>
             <div className="flex items-center gap-1.5">
@@ -89,7 +91,7 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
         {/* Back - Answer */}
         <div className="card-back absolute inset-0 rounded-2xl bg-ink-950 dark:bg-surface-100 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-300 p-5 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-white/10 dark:bg-ink-950/10 text-white/80 dark:text-ink-800">
+            <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-white/10 dark:bg-ink-950/10 text-white/80 dark:text-ink-800">
               Answer
             </span>
           </div>
@@ -100,34 +102,22 @@ export default function FlashcardCard({ card, onEdit, onDelete }: FlashcardCardP
             </p>
           </div>
 
-          {/* Explanation toggle */}
-          {card.explanation && (
-            <div className="mt-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowExplanation(!showExplanation);
-                }}
-                className="w-full flex items-center justify-center gap-1 text-[11px] text-white/50 dark:text-ink-500 hover:text-white/80 dark:hover:text-ink-700 transition-colors font-medium cursor-pointer"
-              >
-                {showExplanation ? "Hide" : "Show"} explanation
-                {showExplanation ? (
-                  <ChevronUp className="w-3 h-3" />
-                ) : (
-                  <ChevronDown className="w-3 h-3" />
-                )}
-              </button>
-              {showExplanation && (
-                <div className="mt-2 p-3 bg-white/8 dark:bg-ink-950/8 rounded-xl text-xs leading-relaxed animate-slide-down text-white/80 dark:text-ink-700">
-                  {card.explanation}
-                </div>
-              )}
-            </div>
-          )}
-
-          <p className="text-center text-[11px] text-white/30 dark:text-ink-400 mt-2 font-medium tracking-wide">
-            tap to flip back
-          </p>
+          {/* Discuss with AI button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDiscuss(card);
+            }}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/60 dark:text-ink-500 hover:text-white dark:hover:text-ink-700 transition-colors cursor-pointer py-2 rounded-xl hover:bg-white/5 dark:hover:bg-ink-950/5"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            Discuss with AI
+            {noteCount > 0 && (
+              <span className="ml-0.5 text-[9px] bg-white/15 dark:bg-ink-950/10 px-1.5 py-0.5 rounded-full">
+                {noteCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
     </div>

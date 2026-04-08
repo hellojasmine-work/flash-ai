@@ -8,6 +8,7 @@ import FlashcardCard from "@/components/FlashcardCard";
 import CreateEditModal from "@/components/CreateEditModal";
 import AIGenerator from "@/components/AIGenerator";
 import StudyMode from "@/components/StudyMode";
+import DiscussPanel from "@/components/DiscussPanel";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
 
@@ -23,6 +24,7 @@ export default function Home() {
     updateFlashcard,
     deleteFlashcard,
     generateWithAI,
+    discussWithAI,
   } = useFlashcards();
 
   const [activeTab, setActiveTab] = useState("cards");
@@ -30,6 +32,7 @@ export default function Home() {
   const [editCard, setEditCard] = useState<Flashcard | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [discussCard, setDiscussCard] = useState<Flashcard | null>(null);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -80,6 +83,19 @@ export default function Home() {
     setEditCard(null);
   };
 
+  const handleDiscuss = (card: Flashcard) => {
+    // Get the latest version of the card from state
+    const latest = flashcards.find((c) => c._id === card._id) || card;
+    setDiscussCard(latest);
+  };
+
+  const handleDiscussMessage = async (cardId: string, message: string) => {
+    const updated = await discussWithAI(cardId, message);
+    // Keep the discuss panel in sync with latest card data
+    setDiscussCard(updated);
+    return updated;
+  };
+
   const hasActiveFilters = filters.category !== "all" || filters.difficulty !== "all";
 
   return (
@@ -96,7 +112,6 @@ export default function Home() {
           <div className="animate-fade-in">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
-              {/* Search */}
               <div className="relative flex-1 w-full sm:max-w-sm">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-ink-500" />
                 <input
@@ -119,7 +134,6 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Filter toggle */}
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
@@ -135,7 +149,6 @@ export default function Home() {
                   )}
                 </button>
 
-                {/* Create button */}
                 <button
                   onClick={() => {
                     setEditCard(null);
@@ -153,7 +166,6 @@ export default function Home() {
             {showFilters && (
               <div className="mb-8 p-5 bg-white dark:bg-ink-900 rounded-2xl border border-surface-200/80 dark:border-ink-800 animate-slide-down shadow-warm-sm">
                 <div className="flex flex-wrap gap-6">
-                  {/* Category */}
                   <div>
                     <label className="block text-[10px] font-semibold text-surface-500 dark:text-ink-400 mb-2.5 uppercase tracking-widest">
                       Category
@@ -185,7 +197,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Difficulty */}
                   <div>
                     <label className="block text-[10px] font-semibold text-surface-500 dark:text-ink-400 mb-2.5 uppercase tracking-widest">
                       Difficulty
@@ -282,6 +293,7 @@ export default function Home() {
                     card={card}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onDiscuss={handleDiscuss}
                   />
                 ))}
               </div>
@@ -292,7 +304,7 @@ export default function Home() {
         {/* Study */}
         {activeTab === "study" && (
           <div className="animate-fade-in py-4">
-            <StudyMode flashcards={flashcards} />
+            <StudyMode flashcards={flashcards} onDiscuss={handleDiscuss} />
           </div>
         )}
 
@@ -313,6 +325,15 @@ export default function Home() {
         editCard={editCard}
         existingCategories={categories}
       />
+
+      {/* Discuss Panel */}
+      {discussCard && (
+        <DiscussPanel
+          card={discussCard}
+          onDiscuss={handleDiscussMessage}
+          onClose={() => setDiscussCard(null)}
+        />
+      )}
 
       {/* Delete Confirmation */}
       {deleteConfirm && (

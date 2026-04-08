@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+export interface Note {
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
 export interface Flashcard {
   _id: string;
   question: string;
@@ -10,6 +16,7 @@ export interface Flashcard {
   category: string;
   difficulty: "easy" | "medium" | "hard";
   isAIGenerated: boolean;
+  notes: Note[];
   createdAt: string;
   updatedAt: string;
 }
@@ -128,6 +135,26 @@ export function useFlashcards() {
     return json.data;
   };
 
+  // Discuss a flashcard with AI — sends a message, returns the updated card with new notes
+  const discussWithAI = async (
+    id: string,
+    message: string
+  ): Promise<Flashcard> => {
+    const res = await fetch(`/api/flashcards/${id}/discuss`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+
+    // Update card in local state with new notes
+    setFlashcards((prev) =>
+      prev.map((card) => (card._id === id ? json.data : card))
+    );
+    return json.data;
+  };
+
   // Get unique categories from existing flashcards
   const categories = Array.from(
     new Set(flashcards.map((card) => card.category))
@@ -149,6 +176,7 @@ export function useFlashcards() {
     updateFlashcard,
     deleteFlashcard,
     generateWithAI,
+    discussWithAI,
     refetch: fetchFlashcards,
   };
 }
