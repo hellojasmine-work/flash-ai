@@ -47,8 +47,44 @@
 }
 
 @layer components {
-  /* Card flip animation */
-  .perspective {
+  /* ============ BOOK STYLES ============ */
+
+  .book-perspective {
+    perspective: 1800px;
+  }
+
+  .book-container {
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .book-container:hover {
+    transform: rotateY(-8deg) rotateX(2deg);
+  }
+
+  /* Page edges on the right side of closed book */
+  .page-edges {
+    background: repeating-linear-gradient(
+      to bottom,
+      #F5F0E8 0px,
+      #F5F0E8 1px,
+      #EBE5D9 1px,
+      #EBE5D9 2px
+    );
+  }
+  .dark .page-edges {
+    background: repeating-linear-gradient(
+      to bottom,
+      #434046 0px,
+      #434046 1px,
+      #2E2D31 1px,
+      #2E2D31 2px
+    );
+  }
+
+  /* ============ CARD FLIP ============ */
+
+  .card-flip-perspective {
     perspective: 1200px;
   }
 
@@ -71,12 +107,32 @@
     transform: rotateY(180deg);
   }
 
-  /* Glass morphism */
+  /* ============ STUDY DECK ============ */
+
+  @keyframes cardTossLeft {
+    0% {
+      transform: translateX(0) translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-320px) translateY(-60px) rotate(-18deg);
+      opacity: 0;
+    }
+  }
+
+  .card-toss {
+    animation: cardTossLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* ============ GENERAL ============ */
+
   .glass {
     @apply bg-surface-50/85 dark:bg-ink-950/90 backdrop-blur-2xl;
   }
 
-  /* Gradient text — warm editorial */
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, #E05A2B 0%, #C2412A 50%, #A13024 100%);
@@ -85,7 +141,6 @@
     background-image: linear-gradient(135deg, #F49B72 0%, #EE7A4D 50%, #E05A2B 100%);
   }
 
-  /* Modal overlay */
   .modal-overlay {
     @apply fixed inset-0 z-50 flex items-center justify-center p-4;
     background: rgba(26, 23, 20, 0.6);
@@ -100,7 +155,7 @@
     animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Difficulty badges — warm tonal */
+  /* Difficulty badges */
   .badge-easy {
     @apply bg-sage-50 text-sage-700 dark:bg-sage-900/30 dark:text-sage-300 font-semibold;
   }
@@ -111,7 +166,6 @@
     @apply bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300 font-semibold;
   }
 
-  /* Shimmer */
   .shimmer {
     @apply relative overflow-hidden;
   }
@@ -137,7 +191,7 @@
     100% { opacity: 1; }
   }
 
-  /* Shared input styles */
+  /* Input & buttons */
   .input-field {
     @apply w-full px-4 py-3 rounded-xl text-sm transition-all duration-200;
     @apply bg-white dark:bg-ink-900 text-ink-950 dark:text-surface-100;
@@ -146,7 +200,6 @@
     @apply focus:outline-none focus:border-accent-400 dark:focus:border-accent-500 focus:ring-2 focus:ring-accent-500/10;
   }
 
-  /* Shared button styles */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm cursor-pointer;
     @apply bg-accent-600 text-white;
@@ -170,16 +223,6 @@
     @apply focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:ring-offset-2;
   }
 
-  /* Decorative dot grid */
-  .dot-grid {
-    background-image: radial-gradient(circle, #C4B9A4 0.5px, transparent 0.5px);
-    background-size: 24px 24px;
-  }
-  .dark .dot-grid {
-    background-image: radial-gradient(circle, #4D4A50 0.5px, transparent 0.5px);
-  }
-
-  /* Toast overrides */
   .toast-custom {
     @apply font-sans;
   }

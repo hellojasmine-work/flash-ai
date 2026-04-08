@@ -1,0 +1,410 @@
+"use client";
+
+import { useState, useCallback, useMemo } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  CheckCircle2,
+  Sparkles,
+  Inbox,
+  Trophy,
+  MessageCircle,
+  ArrowLeft,
+  BookOpen,
+} from "lucide-react";
+import { getBookColor } from "./BookCard";
+import type { Flashcard } from "@/hooks/useFlashcards";
+
+interface StudyDeckProps {
+  flashcards: Flashcard[];
+  onDiscuss: (card: Flashcard) => void;
+}
+
+export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [studyQueue, setStudyQueue] = useState<Flashcard[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [completed, setCompleted] = useState<Flashcard[]>([]);
+  const [tossing, setTossing] = useState(false);
+
+  // Group cards by category for book selection
+  const bookGroups = useMemo(() => {
+    const groups: Record<string, Flashcard[]> = {};
+    flashcards.forEach((card) => {
+      if (!groups[card.category]) groups[card.category] = [];
+      groups[card.category].push(card);
+    });
+    return groups;
+  }, [flashcards]);
+
+  const totalCards = selectedCategory ? bookGroups[selectedCategory]?.length || 0 : 0;
+  const progress = totalCards > 0 ? (completed.length / totalCards) * 100 : 0;
+  const currentCard = studyQueue[currentIndex];
+
+  const handleSelectBook = useCallback((category: string) => {
+    const cards = bookGroups[category] || [];
+    setSelectedCategory(category);
+    setStudyQueue([...cards]);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCompleted([]);
+  }, [bookGroups]);
+
+  const handleBack = useCallback(() => {
+    setSelectedCategory(null);
+    setStudyQueue([]);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCompleted([]);
+  }, []);
+
+  const handleFlip = useCallback(() => {
+    if (tossing) return;
+    setIsFlipped((prev) => !prev);
+  }, [tossing]);
+
+  const handleNext = useCallback(() => {
+    setIsFlipped(false);
+    if (currentIndex < studyQueue.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  }, [currentIndex, studyQueue.length]);
+
+  const handlePrev = useCallback(() => {
+    setIsFlipped(false);
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  }, [currentIndex]);
+
+  const handleMarkStudied = useCallback(() => {
+    if (!currentCard || tossing) return;
+    setTossing(true);
+
+    // After toss animation
+    setTimeout(() => {
+      setCompleted((prev) => [...prev, currentCard]);
+      const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
+      setStudyQueue(newQueue);
+      setIsFlipped(false);
+      setTossing(false);
+      if (currentIndex >= newQueue.length && newQueue.length > 0) {
+        setCurrentIndex(newQueue.length - 1);
+      }
+    }, 450);
+  }, [currentCard, currentIndex, studyQueue, tossing]);
+
+  const handleReset = useCallback(() => {
+    if (!selectedCategory) return;
+    const cards = bookGroups[selectedCategory] || [];
+    setStudyQueue([...cards]);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCompleted([]);
+  }, [selectedCategory, bookGroups]);
+
+  // Empty state
+  if (flashcards.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-surface-100 dark:bg-ink-800 flex items-center justify-center mb-5">
+          <Inbox className="w-7 h-7 text-surface-400 dark:text-ink-500" />
+        </div>
+        <h3 className="font-display text-2xl italic text-ink-800 dark:text-surface-200 mb-2">
+          No cards yet
+        </h3>
+        <p className="text-sm text-surface-500 dark:text-ink-400 max-w-xs">
+          Create some flashcards first, then come back to study them.
+        </p>
+      </div>
+    );
+  }
+
+  // ===== BOOK SELECTION PHASE =====
+  if (!selectedCategory) {
+    const cats = Object.keys(bookGroups);
+    return (
+      <div className="animate-fade-in">
+        <div className="text-center mb-10">
+          <h2 className="font-display text-3xl sm:text-4xl italic text-ink-950 dark:text-surface-50 mb-2">
+            Choose a book
+          </h2>
+          <p className="text-sm text-surface-500 dark:text-ink-400">
+            Pick a category to study
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 max-w-3xl mx-auto">
+          {cats.map((cat, i) => {
+            const color = getBookColor(cat);
+            const count = bookGroups[cat].length;
+            return (
+              <button
+                key={cat}
+                onClick={() => handleSelectBook(cat)}
+                className="book-perspective cursor-pointer group text-left"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <div className="book-container relative w-full rounded-lg overflow-hidden shadow-warm hover:shadow-warm-lg transition-shadow" style={{ aspectRatio: "3 / 4" }}>
+                  {/* Spine */}
+                  <div className="absolute left-0 top-0 bottom-0 w-3" style={{ backgroundColor: color.spine }} />
+                  {/* Cover */}
+                  <div className="absolute inset-0 ml-3 flex flex-col justify-center items-center p-4" style={{ backgroundColor: color.cover }}>
+                    <BookOpen className="w-5 h-5 mb-2 opacity-40" style={{ color: color.text }} />
+                    <h4 className="font-display text-base italic text-center leading-snug mb-1" style={{ color: color.text }}>
+                      {cat}
+                    </h4>
+                    <span className="text-[10px] font-medium opacity-50" style={{ color: color.text }}>
+                      {count} card{count !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ===== COMPLETED STATE =====
+  if (studyQueue.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+        <div className="w-20 h-20 rounded-2xl bg-sage-50 dark:bg-sage-900/30 flex items-center justify-center mb-5">
+          <Trophy className="w-10 h-10 text-sage-500" />
+        </div>
+        <h3 className="font-display text-3xl italic text-ink-900 dark:text-surface-100 mb-2">
+          Well done!
+        </h3>
+        <p className="text-sm text-surface-500 dark:text-ink-400 mb-8">
+          You studied all {totalCards} card{totalCards !== 1 ? "s" : ""} from <em>{selectedCategory}</em>.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={handleBack} className="btn-secondary">
+            <ArrowLeft className="w-4 h-4" />
+            Other Books
+          </button>
+          <button onClick={handleReset} className="btn-primary">
+            <RotateCcw className="w-4 h-4" />
+            Study Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== DECK STUDY PHASE =====
+  const noteCount = currentCard?.notes?.length || 0;
+  const bookColor = getBookColor(selectedCategory);
+
+  return (
+    <div className="max-w-2xl mx-auto animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-1.5 text-sm text-surface-500 dark:text-ink-400 hover:text-ink-700 dark:hover:text-surface-200 font-medium transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Books
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-5 rounded-[2px]" style={{ backgroundColor: bookColor.cover }} />
+          <span className="font-display text-lg italic text-ink-900 dark:text-surface-100">
+            {selectedCategory}
+          </span>
+        </div>
+      </div>
+
+      {/* Progress */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-surface-500 dark:text-ink-400 font-semibold uppercase tracking-wider">
+            Progress
+          </span>
+          <span className="text-xs font-bold text-accent-600 dark:text-accent-400 tabular-nums">
+            {completed.length}/{totalCards}
+          </span>
+        </div>
+        <div className="h-1.5 bg-surface-200 dark:bg-ink-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-accent-500 rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Deck area */}
+      <div className="relative flex items-start justify-center gap-8 mb-8" style={{ minHeight: "360px" }}>
+        {/* Studied pile (left) */}
+        <div className="relative w-32 sm:w-40 flex-shrink-0" style={{ height: "280px" }}>
+          {completed.length === 0 && (
+            <div className="absolute inset-0 border-2 border-dashed border-surface-200 dark:border-ink-800 rounded-2xl flex items-center justify-center">
+              <span className="text-[10px] font-medium text-surface-400 dark:text-ink-600 uppercase tracking-wider">
+                Studied
+              </span>
+            </div>
+          )}
+          {completed.slice(-5).map((card, i) => {
+            const rotation = ((card._id.charCodeAt(0) % 11) - 5) * 1.5;
+            const offsetX = ((card._id.charCodeAt(1) % 7) - 3) * 2;
+            return (
+              <div
+                key={card._id}
+                className="absolute inset-0 rounded-2xl bg-surface-100 dark:bg-ink-800 border border-surface-200/50 dark:border-ink-700/50 shadow-warm-sm"
+                style={{
+                  transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
+                  zIndex: i,
+                }}
+              />
+            );
+          })}
+          {completed.length > 0 && (
+            <div className="absolute -bottom-6 left-0 right-0 text-center">
+              <span className="text-[10px] font-semibold text-sage-600 dark:text-sage-400 tabular-nums">
+                {completed.length} done
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Active deck (right) */}
+        <div className="relative flex-1 max-w-sm" style={{ height: "340px" }}>
+          {/* Background cards (stack effect) */}
+          {studyQueue.slice(currentIndex + 1, currentIndex + 3).map((_, i) => (
+            <div
+              key={`bg-${i}`}
+              className="absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/60 dark:border-ink-800/60 shadow-warm-sm"
+              style={{
+                transform: `translateY(${(i + 1) * 6}px) scale(${1 - (i + 1) * 0.02})`,
+                zIndex: 10 - i,
+                opacity: 1 - (i + 1) * 0.2,
+              }}
+            />
+          ))}
+
+          {/* Current card */}
+          <div
+            className={`card-flip-perspective absolute inset-0 ${tossing ? "card-toss" : ""}`}
+            style={{ zIndex: 20 }}
+          >
+            <div
+              className={`card-flip relative w-full h-full cursor-pointer ${isFlipped ? "flipped" : ""}`}
+              onClick={handleFlip}
+            >
+              {/* Front */}
+              <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/80 dark:border-ink-800 shadow-warm-lg p-6 sm:p-8 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <span
+                    className={`text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full ${
+                      currentCard.difficulty === "easy"
+                        ? "badge-easy"
+                        : currentCard.difficulty === "hard"
+                        ? "badge-hard"
+                        : "badge-medium"
+                    }`}
+                  >
+                    {currentCard.difficulty}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {currentCard.isAIGenerated && (
+                      <span className="text-[10px] text-accent-500 flex items-center gap-0.5 font-semibold uppercase">
+                        <Sparkles className="w-3 h-3" /> AI
+                      </span>
+                    )}
+                    <span className="text-[10px] text-surface-500 dark:text-ink-400 font-medium tabular-nums">
+                      {currentIndex + 1}/{studyQueue.length}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-center text-lg sm:text-xl font-semibold text-ink-900 dark:text-surface-100 leading-relaxed">
+                    {currentCard.question}
+                  </p>
+                </div>
+
+                <p className="text-center text-[11px] text-surface-400 dark:text-ink-500 mt-3 font-medium tracking-wide">
+                  tap to reveal
+                </p>
+              </div>
+
+              {/* Back */}
+              <div className="card-back absolute inset-0 rounded-2xl bg-ink-950 dark:bg-surface-100 shadow-warm-lg p-6 sm:p-8 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-white/10 dark:bg-ink-950/10 text-white/70 dark:text-ink-600">
+                    Answer
+                  </span>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-center text-lg sm:text-xl font-semibold leading-relaxed text-surface-100 dark:text-ink-900">
+                    {currentCard.answer}
+                  </p>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDiscuss(currentCard);
+                  }}
+                  className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/50 dark:text-ink-500 hover:text-white/80 dark:hover:text-ink-700 transition-colors cursor-pointer py-2 rounded-xl hover:bg-white/5 dark:hover:bg-ink-950/5"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Discuss with AI
+                  {noteCount > 0 && (
+                    <span className="text-[9px] bg-white/15 dark:bg-ink-950/10 px-1.5 py-0.5 rounded-full">{noteCount}</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center justify-center gap-3">
+        <button
+          onClick={handlePrev}
+          disabled={currentIndex === 0 || tossing}
+          className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
+          aria-label="Previous card"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={handleMarkStudied}
+          disabled={tossing}
+          className="px-7 py-3 rounded-full bg-sage-600 hover:bg-sage-700 active:scale-[0.97] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-warm cursor-pointer focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:ring-offset-2 disabled:opacity-50"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          Got it!
+        </button>
+
+        <button
+          onClick={handleNext}
+          disabled={currentIndex >= studyQueue.length - 1 || tossing}
+          className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
+          aria-label="Next card"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Reset */}
+      <div className="text-center mt-5">
+        <button
+          onClick={handleReset}
+          className="text-xs text-surface-400 hover:text-surface-600 dark:text-ink-500 dark:hover:text-ink-300 transition-colors flex items-center gap-1.5 mx-auto font-medium cursor-pointer"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Reset session
+        </button>
+      </div>
+    </div>
+  );
+}

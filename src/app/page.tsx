@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
-import { Plus, Search, SlidersHorizontal, X, Loader2, Inbox, AlertTriangle, Sparkles } from "lucide-react";
+import { Plus, Search, X, Loader2, Inbox, AlertTriangle, Sparkles, ArrowLeft, SlidersHorizontal } from "lucide-react";
 import Header from "@/components/Header";
+import BookCard from "@/components/BookCard";
 import FlashcardCard from "@/components/FlashcardCard";
 import CreateEditModal from "@/components/CreateEditModal";
 import AIGenerator from "@/components/AIGenerator";
-import StudyMode from "@/components/StudyMode";
+import StudyDeck from "@/components/StudyDeck";
 import DiscussPanel from "@/components/DiscussPanel";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
@@ -31,17 +32,30 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("cards");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editCard, setEditCard] = useState<Flashcard | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [discussCard, setDiscussCard] = useState<Flashcard | null>(null);
+  const [openBook, setOpenBook] = useState<string | null>(null);
+  const [showDiffFilter, setShowDiffFilter] = useState(false);
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // Group flashcards by category into "books"
+  const bookGroups = useMemo(() => {
+    const groups: Record<string, Flashcard[]> = {};
     flashcards.forEach((card) => {
-      counts[card.category] = (counts[card.category] || 0) + 1;
+      // Apply search filter
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        if (!card.question.toLowerCase().includes(s) && !card.answer.toLowerCase().includes(s)) return;
+      }
+      // Apply difficulty filter
+      if (filters.difficulty !== "all" && card.difficulty !== filters.difficulty) return;
+
+      if (!groups[card.category]) groups[card.category] = [];
+      groups[card.category].push(card);
     });
-    return counts;
-  }, [flashcards]);
+    return groups;
+  }, [flashcards, filters.search, filters.difficulty]);
+
+  const bookCategories = Object.keys(bookGroups).sort();
 
   const handleCreate = async (input: FlashcardInput) => {
     await createFlashcard(input);
@@ -85,7 +99,6 @@ export default function Home() {
   };
 
   const handleDiscuss = (card: Flashcard) => {
-    // Get the latest version of the card from state
     const latest = flashcards.find((c) => c._id === card._id) || card;
     setDiscussCard(latest);
   };
@@ -99,18 +112,21 @@ export default function Home() {
     setDiscussCard(null);
   };
 
-  const hasActiveFilters = filters.category !== "all" || filters.difficulty !== "all";
+  const hasActiveFilters = filters.difficulty !== "all";
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          setOpenBook(null);
+        }}
         cardCount={flashcards.length}
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-5 sm:px-8 py-8">
-        {/* Cards View */}
+        {/* ========== CARDS / BOOKS VIEW ========== */}
         {activeTab === "cards" && (
           <div className="animate-fade-in">
             {/* Toolbar */}
@@ -121,9 +137,7 @@ export default function Home() {
                   type="text"
                   placeholder="Search flashcards..."
                   value={filters.search}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, search: e.target.value }))
-                  }
+                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                   className="input-field !pl-10 !pr-9"
                 />
                 {filters.search && (
@@ -138,25 +152,19 @@ export default function Home() {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowFilters(!showFilters)}
+                  onClick={() => setShowDiffFilter(!showDiffFilter)}
                   className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
-                    showFilters || hasActiveFilters
+                    showDiffFilter || hasActiveFilters
                       ? "border-accent-300 dark:border-accent-700 text-accent-700 dark:text-accent-300 bg-accent-50 dark:bg-accent-900/20"
-                      : "border-surface-200 dark:border-ink-700 text-surface-600 dark:text-ink-300 bg-white dark:bg-ink-900 hover:border-surface-300 dark:hover:border-ink-600"
+                      : "border-surface-200 dark:border-ink-700 text-surface-600 dark:text-ink-300 bg-white dark:bg-ink-900"
                   }`}
                 >
                   <SlidersHorizontal className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filters</span>
-                  {hasActiveFilters && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent-500" />
-                  )}
+                  <span className="hidden sm:inline">Difficulty</span>
+                  {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-accent-500" />}
                 </button>
-
                 <button
-                  onClick={() => {
-                    setEditCard(null);
-                    setShowCreateModal(true);
-                  }}
+                  onClick={() => { setEditCard(null); setShowCreateModal(true); }}
                   className="btn-primary"
                 >
                   <Plus className="w-4 h-4" />
@@ -165,62 +173,22 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Filter panel */}
-            {showFilters && (
-              <div className="mb-8 p-5 bg-white dark:bg-ink-900 rounded-2xl border border-surface-200/80 dark:border-ink-800 animate-slide-down shadow-warm-sm">
-                <div className="flex flex-wrap gap-6">
-                  <div>
-                    <label className="block text-[10px] font-semibold text-surface-500 dark:text-ink-400 mb-2.5 uppercase tracking-widest">
-                      Category
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      <button
-                        onClick={() => setFilters((prev) => ({ ...prev, category: "all" }))}
-                        className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-all duration-200 cursor-pointer ${
-                          filters.category === "all"
-                            ? "bg-ink-950 dark:bg-surface-100 text-white dark:text-ink-950"
-                            : "bg-surface-100 dark:bg-ink-800 text-surface-500 dark:text-ink-400 hover:bg-surface-200 dark:hover:bg-ink-700"
-                        }`}
-                      >
-                        All
-                      </button>
-                      {categories.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => setFilters((prev) => ({ ...prev, category: cat }))}
-                          className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-all duration-200 cursor-pointer ${
-                            filters.category === cat
-                              ? "bg-ink-950 dark:bg-surface-100 text-white dark:text-ink-950"
-                              : "bg-surface-100 dark:bg-ink-800 text-surface-500 dark:text-ink-400 hover:bg-surface-200 dark:hover:bg-ink-700"
-                          }`}
-                        >
-                          {cat} ({categoryCounts[cat]})
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-semibold text-surface-500 dark:text-ink-400 mb-2.5 uppercase tracking-widest">
-                      Difficulty
-                    </label>
-                    <div className="flex gap-1.5">
-                      {["all", "easy", "medium", "hard"].map((d) => (
-                        <button
-                          key={d}
-                          onClick={() => setFilters((prev) => ({ ...prev, difficulty: d }))}
-                          className={`text-xs px-3 py-1.5 rounded-full capitalize font-semibold transition-all duration-200 cursor-pointer ${
-                            filters.difficulty === d
-                              ? "bg-ink-950 dark:bg-surface-100 text-white dark:text-ink-950"
-                              : "bg-surface-100 dark:bg-ink-800 text-surface-500 dark:text-ink-400 hover:bg-surface-200 dark:hover:bg-ink-700"
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            {/* Difficulty filter */}
+            {showDiffFilter && (
+              <div className="mb-8 flex gap-1.5 animate-slide-down">
+                {["all", "easy", "medium", "hard"].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setFilters((prev) => ({ ...prev, difficulty: d }))}
+                    className={`text-xs px-3 py-1.5 rounded-full capitalize font-semibold transition-all cursor-pointer ${
+                      filters.difficulty === d
+                        ? "bg-ink-950 dark:bg-surface-100 text-white dark:text-ink-950"
+                        : "bg-surface-100 dark:bg-ink-800 text-surface-500 dark:text-ink-400 hover:bg-surface-200 dark:hover:bg-ink-700"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
               </div>
             )}
 
@@ -228,7 +196,7 @@ export default function Home() {
             {loading && (
               <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
                 <Loader2 className="w-6 h-6 text-accent-500 animate-spin mb-3" />
-                <p className="text-sm text-surface-500 dark:text-ink-400 font-medium">Loading your cards...</p>
+                <p className="text-sm text-surface-500 dark:text-ink-400 font-medium">Loading your books...</p>
               </div>
             )}
 
@@ -238,16 +206,9 @@ export default function Home() {
                 <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mx-auto mb-4">
                   <AlertTriangle className="w-6 h-6 text-amber-500" />
                 </div>
-                <h3 className="font-display text-xl italic text-ink-800 dark:text-surface-200 mb-1">
-                  Connection error
-                </h3>
-                <p className="text-sm text-surface-500 dark:text-ink-400 mb-5 max-w-xs mx-auto">
-                  {error}
-                </p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="text-sm text-accent-600 dark:text-accent-400 hover:underline font-semibold cursor-pointer"
-                >
+                <h3 className="font-display text-xl italic text-ink-800 dark:text-surface-200 mb-1">Connection error</h3>
+                <p className="text-sm text-surface-500 dark:text-ink-400 mb-5 max-w-xs mx-auto">{error}</p>
+                <button onClick={() => window.location.reload()} className="text-sm text-accent-600 dark:text-accent-400 hover:underline font-semibold cursor-pointer">
                   Try again
                 </button>
               </div>
@@ -259,27 +220,16 @@ export default function Home() {
                 <div className="w-16 h-16 rounded-2xl bg-surface-100 dark:bg-ink-800 flex items-center justify-center mx-auto mb-5">
                   <Inbox className="w-7 h-7 text-surface-400 dark:text-ink-500" />
                 </div>
-                <h3 className="font-display text-2xl italic text-ink-800 dark:text-surface-200 mb-2">
-                  Start your collection
-                </h3>
+                <h3 className="font-display text-2xl italic text-ink-800 dark:text-surface-200 mb-2">Start your library</h3>
                 <p className="text-sm text-surface-500 dark:text-ink-400 mb-8 max-w-xs mx-auto">
-                  Create your first flashcard or let AI generate a set for you.
+                  Create your first flashcard or generate a set with AI.
                 </p>
                 <div className="flex items-center justify-center gap-3">
-                  <button
-                    onClick={() => {
-                      setEditCard(null);
-                      setShowCreateModal(true);
-                    }}
-                    className="btn-secondary"
-                  >
+                  <button onClick={() => { setEditCard(null); setShowCreateModal(true); }} className="btn-secondary">
                     <Plus className="w-4 h-4" />
                     Create Manually
                   </button>
-                  <button
-                    onClick={() => setActiveTab("ai")}
-                    className="btn-primary"
-                  >
+                  <button onClick={() => setActiveTab("ai")} className="btn-primary">
                     <Sparkles className="w-4 h-4" />
                     Generate with AI
                   </button>
@@ -287,31 +237,82 @@ export default function Home() {
               </div>
             )}
 
-            {/* Grid */}
-            {!loading && !error && flashcards.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {flashcards.map((card) => (
-                  <FlashcardCard
-                    key={card._id}
-                    card={card}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onDiscuss={handleDiscuss}
-                  />
-                ))}
+            {/* Book shelf OR open book */}
+            {!loading && !error && flashcards.length > 0 && !openBook && (
+              <>
+                {bookCategories.length === 0 && filters.search && (
+                  <div className="text-center py-16">
+                    <p className="text-sm text-surface-500 dark:text-ink-400">No cards match your search.</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                  {bookCategories.map((cat, i) => (
+                    <BookCard
+                      key={cat}
+                      category={cat}
+                      cards={bookGroups[cat]}
+                      onClick={() => setOpenBook(cat)}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Open book — cards inside */}
+            {!loading && !error && openBook && bookGroups[openBook] && (
+              <div className="animate-fade-in">
+                <button
+                  onClick={() => setOpenBook(null)}
+                  className="flex items-center gap-1.5 text-sm text-surface-500 dark:text-ink-400 hover:text-ink-700 dark:hover:text-surface-200 font-medium transition-colors cursor-pointer mb-6"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to shelf
+                </button>
+
+                <div className="mb-8">
+                  <h2 className="font-display text-3xl italic text-ink-950 dark:text-surface-50 mb-1">
+                    {openBook}
+                  </h2>
+                  <p className="text-sm text-surface-500 dark:text-ink-400">
+                    {bookGroups[openBook].length} card{bookGroups[openBook].length !== 1 ? "s" : ""} in this book
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {bookGroups[openBook].map((card) => (
+                    <FlashcardCard
+                      key={card._id}
+                      card={card}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onDiscuss={handleDiscuss}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Open book — category was filtered out */}
+            {!loading && !error && openBook && !bookGroups[openBook] && (
+              <div className="animate-fade-in text-center py-16">
+                <p className="text-sm text-surface-500 dark:text-ink-400 mb-4">No cards match your current filters.</p>
+                <button onClick={() => setOpenBook(null)} className="text-sm text-accent-600 hover:underline font-semibold cursor-pointer">
+                  Back to shelf
+                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Study */}
+        {/* ========== STUDY VIEW ========== */}
         {activeTab === "study" && (
           <div className="animate-fade-in py-4">
-            <StudyMode flashcards={flashcards} onDiscuss={handleDiscuss} />
+            <StudyDeck flashcards={flashcards} onDiscuss={handleDiscuss} />
           </div>
         )}
 
-        {/* AI Generate */}
+        {/* ========== AI GENERATE ========== */}
         {activeTab === "ai" && (
           <div className="animate-fade-in py-4">
             <AIGenerator onGenerate={handleAIGenerate} />
@@ -349,25 +350,11 @@ export default function Home() {
               <div className="w-14 h-14 rounded-2xl bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-7 h-7 text-accent-500" />
               </div>
-              <h3 className="font-display text-xl italic text-ink-900 dark:text-surface-100 mb-2">
-                Delete this card?
-              </h3>
-              <p className="text-sm text-surface-500 dark:text-ink-400 mb-6">
-                This action cannot be undone.
-              </p>
+              <h3 className="font-display text-xl italic text-ink-900 dark:text-surface-100 mb-2">Delete this card?</h3>
+              <p className="text-sm text-surface-500 dark:text-ink-400 mb-6">This action cannot be undone.</p>
               <div className="flex gap-3">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="btn-secondary flex-1"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="btn-danger flex-1"
-                >
-                  Delete
-                </button>
+                <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">Cancel</button>
+                <button onClick={confirmDelete} className="btn-danger flex-1">Delete</button>
               </div>
             </div>
           </div>
