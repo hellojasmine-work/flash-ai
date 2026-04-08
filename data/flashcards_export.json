@@ -1,0 +1,50 @@
+[
+  {
+    "question": "What is a closure in JavaScript?",
+    "answer": "A closure is a function that retains access to its parent scope's variables even after the parent function has returned.",
+    "explanation": "Closures are created every time a function is created. They allow inner functions to access outer function variables, enabling data encapsulation and private variables. This is fundamental to patterns like module patterns and callbacks.",
+    "category": "JavaScript",
+    "difficulty": "medium",
+    "isAIGenerated": false
+  },
+  {
+    "question": "What is the difference between let, const, and var?",
+    "answer": "var is function-scoped and hoisted; let is block-scoped and not hoisted to usable state; const is block-scoped and cannot be reassigned after declaration.",
+    "explanation": "var was the original way to declare variables in JavaScript. let and const were introduced in ES6. let allows reassignment but is block-scoped, while const prevents reassignment (though object properties can still be modified). Best practice is to use const by default and let when reassignment is needed.",
+    "category": "JavaScript",
+    "difficulty": "easy",
+    "isAIGenerated": false
+  },
+  {
+    "question": "What does the useEffect hook do in React?",
+    "answer": "useEffect lets you perform side effects in functional components, such as fetching data, setting up subscriptions, or manually changing the DOM.",
+    "explanation": "useEffect runs after every render by default. You can control when it runs by passing a dependency array. An empty array means it runs once on mount. It can also return a cleanup function that runs when the component unmounts or before the effect re-runs.",
+    "category": "React",
+    "difficulty": "medium",
+    "isAIGenerated": false
+  },
+  {
+    "question": "What is the Virtual DOM?",
+    "answer": "The Virtual DOM is a lightweight JavaScript representation of the real DOM. React uses it to efficiently determine the minimal set of changes needed to update the actual DOM.",
+    "explanation": "When state changes, React creates a new Virtual DOM tree and compares it with the previous one (diffing). It then calculates the minimal number of operations needed and batches the actual DOM updates. This process, called reconciliation, makes React performant even with frequent state changes.",
+    "category": "React",
+    "difficulty": "medium",
+    "isAIGenerated": true
+  },
+  {
+    "question": "What is MongoDB's equivalent of a SQL table?",
+    "answer": "A collection. MongoDB stores documents (BSON/JSON objects) in collections, which are analogous to tables in relational databases.",
+    "explanation": "Unlike SQL tables, MongoDB collections do not enforce a schema. Documents within the same collection can have different fields. This flexibility allows for rapid iteration and schema evolution without migrations.",
+    "category": "MongoDB",
+    "difficulty": "easy",
+    "isAIGenerated": true
+  },
+  {
+    "question": "Explain the concept of 'hoisting' in JavaScript.",
+    "answer": "Hoisting is JavaScript's behavior of moving variable and function declarations to the top of their scope during compilation, before code execution.",
+    "explanation": "Function declarations are fully hoisted (both name and body), while var declarations are hoisted but initialized as undefined. let and const are hoisted to a 'temporal dead zone' where accessing them before declaration throws a ReferenceError. Understanding hoisting helps prevent bugs related to variable access order.",
+    "category": "JavaScript",
+    "difficulty": "hard",
+    "isAIGenerated": false
+  }
+]
