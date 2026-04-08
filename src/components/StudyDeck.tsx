@@ -110,27 +110,28 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
     if (!currentCard || tossing) return;
     setTossing(true);
 
-    // Spring toss animation
+    // Animate the toss
     tossApi.start({
-      x: -340,
-      y: -40,
-      rotate: -20,
-      opacity: 0,
-      scale: 0.85,
+      x: -340, y: -40, rotate: -20, opacity: 0, scale: 0.85,
       config: { tension: 180, friction: 18 },
-      onRest: () => {
-        setCompleted((prev) => [...prev, currentCard]);
-        const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
-        setStudyQueue(newQueue);
-        setIsFlipped(false);
-        setTossing(false);
-        if (currentIndex >= newQueue.length && newQueue.length > 0) {
-          setCurrentIndex(newQueue.length - 1);
-        }
-        // Reset card position immediately
-        tossApi.start({ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, immediate: true });
-      },
     });
+
+    // After toss completes, update state then reset spring
+    setTimeout(() => {
+      setCompleted((prev) => [...prev, currentCard]);
+      const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
+      setStudyQueue(newQueue);
+      setIsFlipped(false);
+      if (currentIndex >= newQueue.length && newQueue.length > 0) {
+        setCurrentIndex(newQueue.length - 1);
+      }
+
+      // Let React process the state updates, then reset spring for next card
+      requestAnimationFrame(() => {
+        tossApi.start({ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, immediate: true });
+        setTossing(false);
+      });
+    }, 420);
   }, [currentCard, currentIndex, studyQueue, tossing, tossApi]);
 
   const handleReset = useCallback(() => {
