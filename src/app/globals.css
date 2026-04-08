@@ -55,11 +55,6 @@
 
   .book-container {
     transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .book-container:hover {
-    transform: rotateY(-8deg) rotateX(2deg);
   }
 
   /* Page edges on the right side of closed book */
@@ -105,26 +100,6 @@
 
   .card-back {
     transform: rotateY(180deg);
-  }
-
-  /* ============ STUDY DECK ============ */
-
-  @keyframes cardTossLeft {
-    0% {
-      transform: translateX(0) translateY(0) rotate(0deg);
-      opacity: 1;
-    }
-    60% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateX(-320px) translateY(-60px) rotate(-18deg);
-      opacity: 0;
-    }
-  }
-
-  .card-toss {
-    animation: cardTossLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   /* ============ GENERAL ============ */
