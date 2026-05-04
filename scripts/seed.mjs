@@ -21,7 +21,16 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-// Define schema inline for the seed script
+// Define schemas inline for the seed script
+const NoteSchema = new mongoose.Schema(
+  {
+    role: { type: String, enum: ["user", "assistant"], required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const FlashcardSchema = new mongoose.Schema(
   {
     question: { type: String, required: true },
@@ -30,6 +39,7 @@ const FlashcardSchema = new mongoose.Schema(
     category: { type: String, required: true },
     difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
     isAIGenerated: { type: Boolean, default: false },
+    notes: { type: [NoteSchema], default: [] },
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { useSpring, useTrail, animated, config } from "@react-spring/web";
+import { useSpring, useTrail, useTransition, animated } from "@react-spring/web";
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,7 +28,6 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [completed, setCompleted] = useState<Flashcard[]>([]);
-  const [tossing, setTossing] = useState(false);
 
   const bookGroups = useMemo(() => {
     const groups: Record<string, Flashcard[]> = {};
@@ -41,27 +40,30 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
 
   const totalCards = selectedCategory ? bookGroups[selectedCategory]?.length || 0 : 0;
   const progress = totalCards > 0 ? (completed.length / totalCards) * 100 : 0;
-  const currentCard = studyQueue[currentIndex];
+  const currentCard = studyQueue[currentIndex] || null;
 
-  // ===== SPRING: Card toss =====
-  const [tossSpring, tossApi] = useSpring(() => ({
-    x: 0, y: 0, rotate: 0, opacity: 1, scale: 1,
+  // ===== useTransition for card enter/leave =====
+  const cardTransitions = useTransition(currentCard, {
+    keys: (item) => item?._id || "empty",
+    from: { opacity: 0, x: 80, scale: 0.92 },
+    enter: { opacity: 1, x: 0, scale: 1 },
+    leave: { opacity: 0, x: -320, scale: 0.85, rotate: -15 },
     config: { tension: 200, friction: 22 },
-  }));
+  });
 
-  // ===== SPRING: Flip =====
+  // ===== Spring: Flip (resets when card changes) =====
   const flipSpring = useSpring({
     rotateY: isFlipped ? 180 : 0,
     config: { tension: 250, friction: 26 },
   });
 
-  // ===== SPRING: Progress bar =====
+  // ===== Spring: Progress bar =====
   const progressSpring = useSpring({
     width: progress,
     config: { tension: 120, friction: 14 },
   });
 
-  // ===== SPRING: Book selection trail =====
+  // ===== Trail: Book selection =====
   const cats = Object.keys(bookGroups);
   const bookTrail = useTrail(cats.length, {
     from: { opacity: 0, y: 24, scale: 0.95 },
@@ -76,8 +78,7 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
     setCurrentIndex(0);
     setIsFlipped(false);
     setCompleted([]);
-    tossApi.start({ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, immediate: true });
-  }, [bookGroups, tossApi]);
+  }, [bookGroups]);
 
   const handleBack = useCallback(() => {
     setSelectedCategory(null);
@@ -88,9 +89,8 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
   }, []);
 
   const handleFlip = useCallback(() => {
-    if (tossing) return;
     setIsFlipped((prev) => !prev);
-  }, [tossing]);
+  }, []);
 
   const handleNext = useCallback(() => {
     setIsFlipped(false);
@@ -107,32 +107,17 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
   }, [currentIndex]);
 
   const handleMarkStudied = useCallback(() => {
-    if (!currentCard || tossing) return;
-    setTossing(true);
-
-    // Animate the toss
-    tossApi.start({
-      x: -340, y: -40, rotate: -20, opacity: 0, scale: 0.85,
-      config: { tension: 180, friction: 18 },
-    });
-
-    // After toss completes, update state then reset spring
-    setTimeout(() => {
-      setCompleted((prev) => [...prev, currentCard]);
-      const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
-      setStudyQueue(newQueue);
-      setIsFlipped(false);
-      if (currentIndex >= newQueue.length && newQueue.length > 0) {
-        setCurrentIndex(newQueue.length - 1);
-      }
-
-      // Let React process the state updates, then reset spring for next card
-      requestAnimationFrame(() => {
-        tossApi.start({ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, immediate: true });
-        setTossing(false);
-      });
-    }, 420);
-  }, [currentCard, currentIndex, studyQueue, tossing, tossApi]);
+    if (!currentCard) return;
+    // Add to completed
+    setCompleted((prev) => [...prev, currentCard]);
+    // Remove from queue — this changes currentCard, triggering the transition
+    const newQueue = studyQueue.filter((_, i) => i !== currentIndex);
+    setStudyQueue(newQueue);
+    setIsFlipped(false);
+    if (currentIndex >= newQueue.length && newQueue.length > 0) {
+      setCurrentIndex(newQueue.length - 1);
+    }
+  }, [currentCard, currentIndex, studyQueue]);
 
   const handleReset = useCallback(() => {
     if (!selectedCategory) return;
@@ -141,10 +126,9 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
     setCurrentIndex(0);
     setIsFlipped(false);
     setCompleted([]);
-    tossApi.start({ x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, immediate: true });
-  }, [selectedCategory, bookGroups, tossApi]);
+  }, [selectedCategory, bookGroups]);
 
-  // Empty
+  // ===== EMPTY =====
   if (flashcards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
@@ -165,7 +149,6 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
           <h2 className="font-display text-3xl sm:text-4xl italic text-ink-950 dark:text-surface-50 mb-2">Choose a book</h2>
           <p className="text-sm text-surface-500 dark:text-ink-400">Pick a category to study</p>
         </div>
-
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 max-w-3xl mx-auto">
           {bookTrail.map((style, i) => {
             const cat = cats[i];
@@ -174,10 +157,7 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
             return (
               <animated.button
                 key={cat}
-                style={{
-                  opacity: style.opacity,
-                  transform: style.y.to((y) => `translateY(${y}px) scale(${style.scale.get()})`),
-                }}
+                style={{ opacity: style.opacity, transform: style.y.to((y) => `translateY(${y}px) scale(${style.scale.get()})`) }}
                 onClick={() => handleSelectBook(cat)}
                 className="cursor-pointer text-left"
               >
@@ -219,7 +199,6 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
   }
 
   // ===== DECK STUDY =====
-  const noteCount = currentCard?.notes?.length || 0;
   const bookColor = getBookColor(selectedCategory);
 
   return (
@@ -235,17 +214,14 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
         </div>
       </div>
 
-      {/* Spring progress bar */}
+      {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-surface-500 dark:text-ink-400 font-semibold uppercase tracking-wider">Progress</span>
           <span className="text-xs font-bold text-accent-600 dark:text-accent-400 tabular-nums">{completed.length}/{totalCards}</span>
         </div>
         <div className="h-1.5 bg-surface-200 dark:bg-ink-800 rounded-full overflow-hidden">
-          <animated.div
-            className="h-full bg-accent-500 rounded-full"
-            style={{ width: progressSpring.width.to((w) => `${w}%`) }}
-          />
+          <animated.div className="h-full bg-accent-500 rounded-full" style={{ width: progressSpring.width.to((w) => `${w}%`) }} />
         </div>
       </div>
 
@@ -262,13 +238,10 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
             const rotation = ((card._id.charCodeAt(0) % 11) - 5) * 1.8;
             const offsetX = ((card._id.charCodeAt(1) % 7) - 3) * 2;
             return (
-              <animated.div
+              <div
                 key={card._id}
                 className="absolute inset-0 rounded-2xl bg-surface-100 dark:bg-ink-800 border border-surface-200/50 dark:border-ink-700/50 shadow-warm-sm"
-                style={{
-                  transform: `rotate(${rotation}deg) translateX(${offsetX}px)`,
-                  zIndex: i,
-                }}
+                style={{ transform: `rotate(${rotation}deg) translateX(${offsetX}px)`, zIndex: i }}
               />
             );
           })}
@@ -294,85 +267,85 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
             />
           ))}
 
-          {/* Current card — spring animated */}
-          <animated.div
-            className="absolute inset-0"
-            style={{
-              zIndex: 20,
-              x: tossSpring.x,
-              y: tossSpring.y,
-              rotate: tossSpring.rotate,
-              opacity: tossSpring.opacity,
-              scale: tossSpring.scale,
-            }}
-          >
-            <div style={{ perspective: "1200px", width: "100%", height: "100%" }}>
+          {/* Current card — useTransition handles enter/leave */}
+          {cardTransitions((transitionStyle, card) => {
+            if (!card) return null;
+            const noteCount = card.notes?.length || 0;
+            return (
               <animated.div
-                className="relative w-full h-full cursor-pointer"
+                className="absolute inset-0"
                 style={{
-                  transformStyle: "preserve-3d",
-                  transform: flipSpring.rotateY.to((r) => `rotateY(${r}deg)`),
+                  zIndex: 20,
+                  opacity: transitionStyle.opacity,
+                  transform: transitionStyle.x.to(
+                    (x) => `translateX(${x}px) scale(${transitionStyle.scale.get()}) rotate(${(transitionStyle as Record<string, unknown>).rotate !== undefined ? `${(transitionStyle as Record<string, unknown>).rotate}deg` : '0deg'})`
+                  ),
                 }}
-                onClick={handleFlip}
               >
-                {/* Front */}
-                <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/80 dark:border-ink-800 shadow-warm-lg p-6 sm:p-8 flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full ${
-                      currentCard.difficulty === "easy" ? "badge-easy" : currentCard.difficulty === "hard" ? "badge-hard" : "badge-medium"
-                    }`}>
-                      {currentCard.difficulty}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {currentCard.isAIGenerated && (
-                        <span className="text-[10px] text-accent-500 flex items-center gap-0.5 font-semibold uppercase"><Sparkles className="w-3 h-3" /> AI</span>
-                      )}
-                      <span className="text-[10px] text-surface-500 dark:text-ink-400 font-medium tabular-nums">{currentIndex + 1}/{studyQueue.length}</span>
-                    </div>
-                  </div>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-center text-lg sm:text-xl font-semibold text-ink-900 dark:text-surface-100 leading-relaxed">{currentCard.question}</p>
-                  </div>
-                  <p className="text-center text-[11px] text-surface-400 dark:text-ink-500 mt-3 font-medium tracking-wide">tap to reveal</p>
-                </div>
-
-                {/* Back */}
-                <div className="card-back absolute inset-0 rounded-2xl bg-ink-950 dark:bg-surface-100 shadow-warm-lg p-6 sm:p-8 flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-white/10 dark:bg-ink-950/10 text-white/70 dark:text-ink-600">Answer</span>
-                  </div>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-center text-lg sm:text-xl font-semibold leading-relaxed text-surface-100 dark:text-ink-900">{currentCard.answer}</p>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDiscuss(currentCard); }}
-                    className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/50 dark:text-ink-500 hover:text-white/80 dark:hover:text-ink-700 transition-colors cursor-pointer py-2 rounded-xl hover:bg-white/5 dark:hover:bg-ink-950/5"
+                <div style={{ perspective: "1200px", width: "100%", height: "100%" }}>
+                  <animated.div
+                    className="relative w-full h-full cursor-pointer"
+                    style={{ transformStyle: "preserve-3d", transform: flipSpring.rotateY.to((r) => `rotateY(${r}deg)`) }}
+                    onClick={handleFlip}
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    Discuss with AI
-                    {noteCount > 0 && <span className="text-[9px] bg-white/15 dark:bg-ink-950/10 px-1.5 py-0.5 rounded-full">{noteCount}</span>}
-                  </button>
+                    {/* Front */}
+                    <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/80 dark:border-ink-800 shadow-warm-lg p-6 sm:p-8 flex flex-col">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className={`text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full ${
+                          card.difficulty === "easy" ? "badge-easy" : card.difficulty === "hard" ? "badge-hard" : "badge-medium"
+                        }`}>{card.difficulty}</span>
+                        <div className="flex items-center gap-2">
+                          {card.isAIGenerated && (
+                            <span className="text-[10px] text-accent-500 flex items-center gap-0.5 font-semibold uppercase"><Sparkles className="w-3 h-3" /> AI</span>
+                          )}
+                          <span className="text-[10px] text-surface-500 dark:text-ink-400 font-medium tabular-nums">{currentIndex + 1}/{studyQueue.length}</span>
+                        </div>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center">
+                        <p className="text-center text-lg sm:text-xl font-semibold text-ink-900 dark:text-surface-100 leading-relaxed">{card.question}</p>
+                      </div>
+                      <p className="text-center text-[11px] text-surface-400 dark:text-ink-500 mt-3 font-medium tracking-wide">tap to reveal</p>
+                    </div>
+
+                    {/* Back */}
+                    <div className="card-back absolute inset-0 rounded-2xl bg-ink-950 dark:bg-surface-100 shadow-warm-lg p-6 sm:p-8 flex flex-col">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-white/10 dark:bg-ink-950/10 text-white/70 dark:text-ink-600">Answer</span>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center">
+                        <p className="text-center text-lg sm:text-xl font-semibold leading-relaxed text-surface-100 dark:text-ink-900">{card.answer}</p>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDiscuss(card); }}
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/50 dark:text-ink-500 hover:text-white/80 dark:hover:text-ink-700 transition-colors cursor-pointer py-2 rounded-xl hover:bg-white/5 dark:hover:bg-ink-950/5"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        Discuss with AI
+                        {noteCount > 0 && <span className="text-[9px] bg-white/15 dark:bg-ink-950/10 px-1.5 py-0.5 rounded-full">{noteCount}</span>}
+                      </button>
+                    </div>
+                  </animated.div>
                 </div>
               </animated.div>
-            </div>
-          </animated.div>
+            );
+          })}
         </div>
       </div>
 
       {/* Controls */}
       <div className="flex items-center justify-center gap-3">
-        <button onClick={handlePrev} disabled={currentIndex === 0 || tossing}
+        <button onClick={handlePrev} disabled={currentIndex === 0}
           className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
           aria-label="Previous card">
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        <button onClick={handleMarkStudied} disabled={tossing}
-          className="px-7 py-3 rounded-full bg-sage-600 hover:bg-sage-700 active:scale-[0.97] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-warm cursor-pointer focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:ring-offset-2 disabled:opacity-50">
+        <button onClick={handleMarkStudied}
+          className="px-7 py-3 rounded-full bg-sage-600 hover:bg-sage-700 active:scale-[0.97] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-warm cursor-pointer focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:ring-offset-2">
           <CheckCircle2 className="w-4 h-4" />Got it!
         </button>
 
-        <button onClick={handleNext} disabled={currentIndex >= studyQueue.length - 1 || tossing}
+        <button onClick={handleNext} disabled={currentIndex >= studyQueue.length - 1}
           className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
           aria-label="Next card">
           <ChevronRight className="w-5 h-5" />

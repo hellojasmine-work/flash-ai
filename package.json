@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.40",
     "@react-spring/web": "^10.0.3",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^3.3.0",
     "lucide-react": "^0.400.0",
     "mongoose": "^8.5.0",

@@ -2,49 +2,193 @@
   {
     "question": "What is a closure in JavaScript?",
     "answer": "A closure is a function that retains access to its parent scope's variables even after the parent function has returned.",
-    "explanation": "Closures are created every time a function is created. They allow inner functions to access outer function variables, enabling data encapsulation and private variables. This is fundamental to patterns like module patterns and callbacks.",
+    "explanation": "Closures are created every time a function is created. They allow inner functions to access outer function variables, enabling data encapsulation and private variables. This is fundamental to patterns like module patterns, callbacks, and event handlers in JavaScript.",
     "category": "JavaScript",
     "difficulty": "medium",
-    "isAIGenerated": false
+    "isAIGenerated": false,
+    "notes": [
+      { "role": "user", "content": "Can you give me a real-world example of closures?", "createdAt": "2026-03-20T10:15:00.000Z" },
+      { "role": "assistant", "content": "A classic example is a counter function:\n\nfunction createCounter() {\n  let count = 0;\n  return {\n    increment: () => ++count,\n    getCount: () => count\n  };\n}\n\nHere, `count` is enclosed by the returned object's methods. Even after `createCounter()` finishes, `increment` and `getCount` still have access to `count`. This pattern is used heavily in React hooks like `useState` internally.", "createdAt": "2026-03-20T10:15:05.000Z" }
+    ]
   },
   {
     "question": "What is the difference between let, const, and var?",
-    "answer": "var is function-scoped and hoisted; let is block-scoped and not hoisted to usable state; const is block-scoped and cannot be reassigned after declaration.",
-    "explanation": "var was the original way to declare variables in JavaScript. let and const were introduced in ES6. let allows reassignment but is block-scoped, while const prevents reassignment (though object properties can still be modified). Best practice is to use const by default and let when reassignment is needed.",
+    "answer": "var is function-scoped and hoisted; let is block-scoped and not hoisted to a usable state; const is block-scoped and cannot be reassigned after declaration.",
+    "explanation": "var was the original way to declare variables in JavaScript. let and const were introduced in ES6 (2015). let allows reassignment but is block-scoped, while const prevents reassignment (though object properties can still be mutated). Best practice is to use const by default and let only when reassignment is needed.",
     "category": "JavaScript",
     "difficulty": "easy",
-    "isAIGenerated": false
-  },
-  {
-    "question": "What does the useEffect hook do in React?",
-    "answer": "useEffect lets you perform side effects in functional components, such as fetching data, setting up subscriptions, or manually changing the DOM.",
-    "explanation": "useEffect runs after every render by default. You can control when it runs by passing a dependency array. An empty array means it runs once on mount. It can also return a cleanup function that runs when the component unmounts or before the effect re-runs.",
-    "category": "React",
-    "difficulty": "medium",
-    "isAIGenerated": false
-  },
-  {
-    "question": "What is the Virtual DOM?",
-    "answer": "The Virtual DOM is a lightweight JavaScript representation of the real DOM. React uses it to efficiently determine the minimal set of changes needed to update the actual DOM.",
-    "explanation": "When state changes, React creates a new Virtual DOM tree and compares it with the previous one (diffing). It then calculates the minimal number of operations needed and batches the actual DOM updates. This process, called reconciliation, makes React performant even with frequent state changes.",
-    "category": "React",
-    "difficulty": "medium",
-    "isAIGenerated": true
-  },
-  {
-    "question": "What is MongoDB's equivalent of a SQL table?",
-    "answer": "A collection. MongoDB stores documents (BSON/JSON objects) in collections, which are analogous to tables in relational databases.",
-    "explanation": "Unlike SQL tables, MongoDB collections do not enforce a schema. Documents within the same collection can have different fields. This flexibility allows for rapid iteration and schema evolution without migrations.",
-    "category": "MongoDB",
-    "difficulty": "easy",
-    "isAIGenerated": true
+    "isAIGenerated": false,
+    "notes": []
   },
   {
     "question": "Explain the concept of 'hoisting' in JavaScript.",
-    "answer": "Hoisting is JavaScript's behavior of moving variable and function declarations to the top of their scope during compilation, before code execution.",
-    "explanation": "Function declarations are fully hoisted (both name and body), while var declarations are hoisted but initialized as undefined. let and const are hoisted to a 'temporal dead zone' where accessing them before declaration throws a ReferenceError. Understanding hoisting helps prevent bugs related to variable access order.",
+    "answer": "Hoisting is JavaScript's behavior of moving variable and function declarations to the top of their scope during the compilation phase, before code execution.",
+    "explanation": "Function declarations are fully hoisted (both name and body), while var declarations are hoisted but initialized as undefined. let and const are hoisted to a 'temporal dead zone' — accessing them before their declaration line throws a ReferenceError. Understanding hoisting helps prevent subtle bugs related to variable access order.",
     "category": "JavaScript",
     "difficulty": "hard",
-    "isAIGenerated": false
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is the event loop in JavaScript?",
+    "answer": "The event loop is a mechanism that allows JavaScript to perform non-blocking operations by offloading tasks to the browser/Node.js APIs, then queuing their callbacks for execution when the call stack is empty.",
+    "explanation": "JavaScript is single-threaded, meaning it can only execute one piece of code at a time. The event loop continuously checks whether the call stack is empty and, if so, pushes the next callback from the task queue (macrotasks) or microtask queue (Promises) onto the stack. Microtasks always execute before the next macrotask.",
+    "category": "JavaScript",
+    "difficulty": "hard",
+    "isAIGenerated": true,
+    "notes": [
+      { "role": "user", "content": "What's the difference between microtasks and macrotasks?", "createdAt": "2026-03-22T14:00:00.000Z" },
+      { "role": "assistant", "content": "Microtasks include Promise callbacks (.then, .catch, .finally) and queueMicrotask(). Macrotasks include setTimeout, setInterval, setImmediate (Node.js), and I/O callbacks.\n\nThe key difference: after each macrotask completes, the engine drains the entire microtask queue before moving to the next macrotask. This means Promises always resolve before the next setTimeout callback, even if the timeout is 0ms.", "createdAt": "2026-03-22T14:00:08.000Z" }
+    ]
+  },
+  {
+    "question": "What are Promises and how do they differ from callbacks?",
+    "answer": "Promises represent the eventual result of an asynchronous operation. Unlike callbacks, they provide a chainable .then()/.catch() interface that avoids deeply nested 'callback hell' and enables cleaner error handling.",
+    "explanation": "A Promise is in one of three states: pending, fulfilled, or rejected. Promises can be chained with .then() for sequential async operations and composed with Promise.all(), Promise.race(), and Promise.allSettled(). With async/await syntax (ES2017), Promises can be used in a synchronous-looking style.",
+    "category": "JavaScript",
+    "difficulty": "medium",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What does the useEffect hook do in React?",
+    "answer": "useEffect lets you perform side effects in functional components, such as fetching data, setting up subscriptions, or manually interacting with the DOM.",
+    "explanation": "useEffect runs after the component renders. You can control when it re-runs by passing a dependency array as the second argument. An empty array [] means it runs only on mount. It can return a cleanup function that executes when the component unmounts or before the effect re-runs, which is essential for preventing memory leaks.",
+    "category": "React",
+    "difficulty": "medium",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is the Virtual DOM and why does React use it?",
+    "answer": "The Virtual DOM is a lightweight in-memory representation of the real DOM. React uses it to batch and minimize costly direct DOM manipulations by first computing the minimal diff between the previous and new virtual trees.",
+    "explanation": "When state changes in a React component, a new Virtual DOM tree is created and compared with the previous one through a process called 'reconciliation' (using a diffing algorithm). React then calculates the smallest set of changes needed and applies them to the real DOM in a single batch. This approach makes UI updates fast and predictable.",
+    "category": "React",
+    "difficulty": "medium",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What is the difference between controlled and uncontrolled components in React?",
+    "answer": "Controlled components have their form data managed by React state (via value + onChange), while uncontrolled components store their data in the DOM itself and are accessed via refs.",
+    "explanation": "In a controlled component, every keystroke triggers a state update and re-render — React is the 'single source of truth'. In an uncontrolled component, you use useRef to read the DOM value when needed (e.g., on form submit). Controlled components offer more predictability and validation control; uncontrolled components can be simpler for basic forms.",
+    "category": "React",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is React.memo and when should you use it?",
+    "answer": "React.memo is a higher-order component that memoizes a component, preventing re-renders if its props haven't changed (shallow comparison by default).",
+    "explanation": "React.memo is useful for expensive components that receive the same props frequently. However, overusing it can actually hurt performance because the shallow comparison itself has a cost. Use it when a component re-renders often with unchanged props and the render is non-trivial. Combine it with useCallback/useMemo to stabilize prop references.",
+    "category": "React",
+    "difficulty": "hard",
+    "isAIGenerated": true,
+    "notes": [
+      { "role": "user", "content": "When should I NOT use React.memo?", "createdAt": "2026-04-01T09:20:00.000Z" },
+      { "role": "assistant", "content": "Avoid React.memo when:\n\n1. The component is lightweight and renders fast — the comparison cost may exceed the render cost.\n2. Props change on almost every render (e.g., inline objects/functions without useCallback/useMemo) — memo will compare and still re-render every time.\n3. The component already uses context that changes frequently — memo can't prevent re-renders triggered by context changes.\n\nProfile first, optimize second. React DevTools Profiler can help identify which components actually benefit from memoization.", "createdAt": "2026-04-01T09:20:12.000Z" }
+    ]
+  },
+  {
+    "question": "What is MongoDB's equivalent of a SQL table?",
+    "answer": "A collection. MongoDB stores documents (BSON/JSON-like objects) in collections, which are analogous to tables in relational databases.",
+    "explanation": "Unlike SQL tables, MongoDB collections do not enforce a fixed schema by default. Documents within the same collection can have different fields and structures. This schema flexibility allows for rapid iteration and evolution without running migration scripts, though MongoDB does support optional schema validation rules.",
+    "category": "MongoDB",
+    "difficulty": "easy",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What is the aggregation pipeline in MongoDB?",
+    "answer": "The aggregation pipeline is a framework for data processing that passes documents through a sequence of stages (e.g., $match, $group, $sort, $project) to transform and analyze data.",
+    "explanation": "Each stage in the pipeline transforms the documents and passes the results to the next stage. Common stages include $match (filter), $group (aggregate by key), $sort (order), $project (reshape), $lookup (join), and $unwind (flatten arrays). The pipeline is executed server-side and is MongoDB's primary tool for complex queries and analytics.",
+    "category": "MongoDB",
+    "difficulty": "hard",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What is the difference between embedding and referencing in MongoDB data modeling?",
+    "answer": "Embedding stores related data inside a single document (denormalized), while referencing stores related data in separate documents/collections and links them by ObjectId (normalized).",
+    "explanation": "Embed when: the related data is always accessed together, the subdocument array won't grow unboundedly, and you want atomic single-document operations. Reference when: the related data is accessed independently, the relationship is many-to-many, or subdocuments could grow very large. MongoDB's 16MB document size limit is a practical constraint for embedding.",
+    "category": "MongoDB",
+    "difficulty": "medium",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is the difference between SQL and NoSQL databases?",
+    "answer": "SQL databases are relational, use structured schemas with tables/rows, and support ACID transactions. NoSQL databases (like MongoDB) are non-relational, support flexible schemas with documents/key-value/graph structures, and prioritize scalability and performance.",
+    "explanation": "SQL databases excel at complex joins, strong consistency, and well-defined relationships (e.g., PostgreSQL, MySQL). NoSQL databases excel at horizontal scaling, flexible data models, and high write throughput (e.g., MongoDB, Redis, Cassandra). The choice depends on the use case: transactional systems often favor SQL, while real-time apps and large-scale data often favor NoSQL.",
+    "category": "Database Concepts",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What are indexes in a database and why are they important?",
+    "answer": "Indexes are data structures that store a subset of a collection's fields in an efficiently traversable form (e.g., B-tree), enabling the database to locate documents without scanning every document.",
+    "explanation": "Without indexes, a query must perform a full collection scan — checking every document. Indexes dramatically speed up reads and queries at the cost of slightly slower writes (since the index must be updated on each write). Common index types include single-field, compound (multi-field), text, geospatial, and unique indexes.",
+    "category": "Database Concepts",
+    "difficulty": "medium",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What is Next.js and how does it differ from plain React?",
+    "answer": "Next.js is a React framework that adds server-side rendering (SSR), static site generation (SSG), file-based routing, API routes, and built-in optimizations on top of React's client-side library.",
+    "explanation": "Plain React (Create React App) is a client-side SPA — the browser downloads JS, then renders. Next.js pre-renders pages on the server or at build time, improving SEO and initial load performance. It also provides a built-in backend (API routes), automatic code splitting, image optimization, and middleware support.",
+    "category": "Next.js",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is the difference between SSR, SSG, and ISR in Next.js?",
+    "answer": "SSR (Server-Side Rendering) generates HTML on each request. SSG (Static Site Generation) generates HTML at build time. ISR (Incremental Static Regeneration) re-generates static pages in the background after a specified revalidation interval.",
+    "explanation": "SSR is best for highly dynamic content that changes per request (e.g., user dashboards). SSG is ideal for content that rarely changes (e.g., blog posts, docs). ISR combines the speed of static pages with the freshness of dynamic content — pages are served from cache and regenerated in the background when stale.",
+    "category": "Next.js",
+    "difficulty": "medium",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What are API Routes in Next.js?",
+    "answer": "API Routes are serverless functions defined in the app/api directory that handle HTTP requests (GET, POST, PUT, DELETE), allowing you to build a backend API directly within a Next.js project.",
+    "explanation": "Each file in app/api/ exports handler functions for HTTP methods. They run server-side only, so you can safely access databases, environment variables, and secrets without exposing them to the client. On Vercel, API routes are deployed as serverless functions that scale automatically.",
+    "category": "Next.js",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": [
+      { "role": "user", "content": "Is there a size or timeout limit for API routes on Vercel?", "createdAt": "2026-04-05T16:30:00.000Z" },
+      { "role": "assistant", "content": "Yes — on Vercel's free (Hobby) plan:\n\n• Request body size limit: 4.5MB\n• Execution timeout: 10 seconds (Hobby), 60s (Pro), 300s (Enterprise)\n• Response body size: 4.5MB\n\nFor longer tasks, consider using Vercel's Edge Functions (faster cold starts, 30s timeout on free plan) or background functions. For large file uploads, use presigned URLs to upload directly to a storage service like S3 or Vercel Blob.", "createdAt": "2026-04-05T16:30:10.000Z" }
+    ]
+  },
+  {
+    "question": "What is the CSS Box Model?",
+    "answer": "The CSS Box Model describes how every HTML element is rendered as a rectangular box consisting of four layers: content, padding, border, and margin (from inside to outside).",
+    "explanation": "By default (content-box), an element's width/height applies only to the content area — padding and border are added on top. With box-sizing: border-box, width/height includes padding and border, making layout calculations much more intuitive. This is why most CSS resets include * { box-sizing: border-box; }.",
+    "category": "CSS",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": []
+  },
+  {
+    "question": "What is the difference between Flexbox and CSS Grid?",
+    "answer": "Flexbox is a one-dimensional layout system (row OR column) for distributing space among items. CSS Grid is a two-dimensional layout system (rows AND columns) for creating complex grid-based layouts.",
+    "explanation": "Use Flexbox for: navigation bars, centering content, distributing items in a single row/column, and flexible component layouts. Use Grid for: page-level layouts, card grids, dashboard layouts, and any design that needs precise row-and-column control. They complement each other — many modern layouts use Grid for the page structure and Flexbox within individual components.",
+    "category": "CSS",
+    "difficulty": "medium",
+    "isAIGenerated": true,
+    "notes": []
+  },
+  {
+    "question": "What is Tailwind CSS and how does it differ from traditional CSS frameworks?",
+    "answer": "Tailwind CSS is a utility-first CSS framework that provides low-level utility classes (e.g., flex, pt-4, text-center) instead of pre-built components like Bootstrap. You compose designs directly in your HTML/JSX.",
+    "explanation": "Traditional frameworks (Bootstrap, Bulma) give you pre-styled components (.btn, .card) that you customize with overrides. Tailwind gives you atomic building blocks, offering more flexibility and less CSS bloat (unused styles are purged at build time). The trade-off is more verbose markup, but it eliminates context-switching between HTML and CSS files.",
+    "category": "CSS",
+    "difficulty": "easy",
+    "isAIGenerated": false,
+    "notes": []
   }
 ]
