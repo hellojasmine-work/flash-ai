@@ -10,9 +10,10 @@ interface FlashcardCardProps {
   onEdit: (card: Flashcard) => void;
   onDelete: (id: string) => void;
   onDiscuss: (card: Flashcard) => void;
+  onView?: (card: Flashcard) => void;
 }
 
-export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss }: FlashcardCardProps) {
+export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss, onView }: FlashcardCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -51,7 +52,7 @@ export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss }: Fla
             transformStyle: "preserve-3d",
             transform: flipSpring.rotateY.to((r) => `rotateY(${r}deg)`),
           }}
-          onClick={() => setIsFlipped(!isFlipped)}
+          onClick={() => { setIsFlipped(!isFlipped); if (!isFlipped && onView) onView(card); }}
         >
           {/* Front */}
           <div className="card-front absolute inset-0 rounded-2xl bg-white dark:bg-ink-900 border border-surface-200/80 dark:border-ink-800/80 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-shadow duration-300 p-5 flex flex-col">

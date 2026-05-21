@@ -20,9 +20,10 @@ import type { Flashcard } from "@/hooks/useFlashcards";
 interface StudyDeckProps {
   flashcards: Flashcard[];
   onDiscuss: (card: Flashcard) => void;
+  onStudied?: (card: Flashcard) => void;
 }
 
-export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
+export default function StudyDeck({ flashcards, onDiscuss, onStudied }: StudyDeckProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [studyQueue, setStudyQueue] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -108,6 +109,7 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
 
   const handleMarkStudied = useCallback(() => {
     if (!currentCard) return;
+    if (onStudied) onStudied(currentCard);
     // Add to completed
     setCompleted((prev) => [...prev, currentCard]);
     // Remove from queue — this changes currentCard, triggering the transition
@@ -117,7 +119,7 @@ export default function StudyDeck({ flashcards, onDiscuss }: StudyDeckProps) {
     if (currentIndex >= newQueue.length && newQueue.length > 0) {
       setCurrentIndex(newQueue.length - 1);
     }
-  }, [currentCard, currentIndex, studyQueue]);
+  }, [currentCard, currentIndex, studyQueue, onStudied]);
 
   const handleReset = useCallback(() => {
     if (!selectedCategory) return;

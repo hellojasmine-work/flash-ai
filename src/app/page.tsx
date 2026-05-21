@@ -10,7 +10,10 @@ import CreateEditModal from "@/components/CreateEditModal";
 import AIGenerator from "@/components/AIGenerator";
 import StudyDeck from "@/components/StudyDeck";
 import DiscussPanel from "@/components/DiscussPanel";
+import AuthModal from "@/components/AuthModal";
+import AdminPanel from "@/components/AdminPanel";
 import { useFlashcards } from "@/hooks/useFlashcards";
+import { useAuth } from "@/hooks/useAuth";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
 
 export default function Home() {
@@ -29,8 +32,11 @@ export default function Home() {
     syncCardNotes,
   } = useFlashcards();
 
+  const { user, loading: authLoading, login, register, logout, logHistory } = useAuth();
+
   const [activeTab, setActiveTab] = useState("cards");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [editCard, setEditCard] = useState<Flashcard | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [discussCard, setDiscussCard] = useState<Flashcard | null>(null);
@@ -41,14 +47,11 @@ export default function Home() {
   const bookGroups = useMemo(() => {
     const groups: Record<string, Flashcard[]> = {};
     flashcards.forEach((card) => {
-      // Apply search filter
       if (filters.search) {
         const s = filters.search.toLowerCase();
         if (!card.question.toLowerCase().includes(s) && !card.answer.toLowerCase().includes(s)) return;
       }
-      // Apply difficulty filter
       if (filters.difficulty !== "all" && card.difficulty !== filters.difficulty) return;
-
       if (!groups[card.category]) groups[card.category] = [];
       groups[card.category].push(card);
     });
@@ -101,6 +104,15 @@ export default function Home() {
   const handleDiscuss = (card: Flashcard) => {
     const latest = flashcards.find((c) => c._id === card._id) || card;
     setDiscussCard(latest);
+    logHistory(card._id, card.question, card.category, "discuss");
+  };
+
+  const handleCardView = (card: Flashcard) => {
+    logHistory(card._id, card.question, card.category, "view");
+  };
+
+  const handleCardStudied = (card: Flashcard) => {
+    logHistory(card._id, card.question, card.category, "study");
   };
 
   const handleDiscussMessage = async (cardId: string, message: string) => {
@@ -110,6 +122,22 @@ export default function Home() {
   const handleDiscussClose = (cardId: string, notes: import("@/hooks/useFlashcards").Note[]) => {
     syncCardNotes(cardId, notes);
     setDiscussCard(null);
+  };
+
+  const handleLogin = async (email: string, password: string) => {
+    await login(email, password);
+    toast.success("Welcome back!");
+  };
+
+  const handleRegister = async (username: string, email: string, password: string) => {
+    await register(username, email, password);
+    toast.success("Account created!");
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Signed out");
+    if (activeTab === "admin") setActiveTab("cards");
   };
 
   const hasActiveFilters = filters.difficulty !== "all";
@@ -123,6 +151,10 @@ export default function Home() {
           setOpenBook(null);
         }}
         cardCount={flashcards.length}
+        user={user}
+        authLoading={authLoading}
+        onLoginClick={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-5 sm:px-8 py-8">
@@ -237,7 +269,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* Book shelf OR open book */}
+            {/* Book shelf */}
             {!loading && !error && flashcards.length > 0 && !openBook && (
               <>
                 {bookCategories.length === 0 && filters.search && (
@@ -287,13 +319,14 @@ export default function Home() {
                       onEdit={handleEdit}
                       onDelete={handleDelete}
                       onDiscuss={handleDiscuss}
+                      onView={handleCardView}
                     />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Open book — category was filtered out */}
+            {/* Open book — filtered out */}
             {!loading && !error && openBook && !bookGroups[openBook] && (
               <div className="animate-fade-in text-center py-16">
                 <p className="text-sm text-surface-500 dark:text-ink-400 mb-4">No cards match your current filters.</p>
@@ -308,7 +341,11 @@ export default function Home() {
         {/* ========== STUDY VIEW ========== */}
         {activeTab === "study" && (
           <div className="animate-fade-in py-4">
-            <StudyDeck flashcards={flashcards} onDiscuss={handleDiscuss} />
+            <StudyDeck
+              flashcards={flashcards}
+              onDiscuss={handleDiscuss}
+              onStudied={handleCardStudied}
+            />
           </div>
         )}
 
@@ -318,7 +355,22 @@ export default function Home() {
             <AIGenerator onGenerate={handleAIGenerate} />
           </div>
         )}
+
+        {/* ========== ADMIN PANEL ========== */}
+        {activeTab === "admin" && user?.role === "admin" && (
+          <div className="animate-fade-in py-4">
+            <AdminPanel />
+          </div>
+        )}
       </main>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
 
       {/* Create/Edit Modal */}
       <CreateEditModal
