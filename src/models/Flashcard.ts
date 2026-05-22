@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 /**
  * A single discussion note (message) on a flashcard.
@@ -20,6 +20,8 @@ export interface IFlashcard extends Document {
   difficulty: "easy" | "medium" | "hard";
   isAIGenerated: boolean;
   notes: INote[];
+  /** User who created this card. Optional for legacy/anonymous cards. */
+  createdBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +88,12 @@ const FlashcardSchema = new Schema<IFlashcard>(
     notes: {
       type: [NoteSchema],
       default: [],
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      index: true,
     },
   },
   {

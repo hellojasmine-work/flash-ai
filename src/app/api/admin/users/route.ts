@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import ViewHistory from "@/models/ViewHistory";
+import Flashcard from "@/models/Flashcard";
 import { getSessionFromRequest } from "@/lib/auth";
 
 /**
@@ -35,18 +36,53 @@ export async function GET(request: NextRequest) {
 
     const statsMap = new Map(stats.map((s) => [s._id.toString(), s]));
 
-    const result = users.map((u) => ({
-      ...u,
-      stats: statsMap.get(u._id.toString()) || {
-        totalActions: 0,
-        views: 0,
-        studied: 0,
-        discussed: 0,
-        lastActive: null,
+    // Aggregate flashcard counts per creator
+    const cardCounts = await Flashcard.aggregate([
+      { $match: { createdBy: { $ne: null } } },
+      {
+        $group: {
+          _id: "$createdBy",
+          cardsCreated: { $sum: 1 },
+          aiGenerated: { $sum: { $cond: [{ $eq: ["$isAIGenerated", true] }, 1, 0] } },
+        },
       },
-    }));
+    ]);
 
-    return NextResponse.json({ success: true, data: result });
+    const cardCountMap = new Map(cardCounts.map((c) => [c._id.toString(), c]));
+
+    // Totals for the admin dashboard summary card
+    const totalCards = await Flashcard.countDocuments();
+    const anonymousCards = await Flashcard.countDocuments({ createdBy: null });
+    const totalUsers = users.length;
+
+    const result = users.map((u) => {
+      const cardStats = cardCountMap.get(u._id.toString()) || { cardsCreated: 0, aiGenerated: 0 };
+      return {
+        ...u,
+        stats: {
+          ...(statsMap.get(u._id.toString()) || {
+            totalActions: 0,
+            views: 0,
+            studied: 0,
+            discussed: 0,
+            lastActive: null,
+          }),
+          cardsCreated: cardStats.cardsCreated,
+          aiGenerated: cardStats.aiGenerated,
+        },
+      };
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: result,
+      summary: {
+        totalUsers,
+        totalCards,
+        anonymousCards,
+        cardsByUsers: totalCards - anonymousCards,
+      },
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ success: false, error: message }, { status: 500 });

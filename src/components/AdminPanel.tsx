@@ -13,6 +13,9 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
+  Layers,
+  Sparkles,
+  UserCircle2,
 } from "lucide-react";
 
 interface UserStats {
@@ -21,6 +24,8 @@ interface UserStats {
   studied: number;
   discussed: number;
   lastActive: string | null;
+  cardsCreated: number;
+  aiGenerated: number;
 }
 
 interface AdminUser {
@@ -30,6 +35,13 @@ interface AdminUser {
   role: "user" | "admin";
   createdAt: string;
   stats: UserStats;
+}
+
+interface AdminSummary {
+  totalUsers: number;
+  totalCards: number;
+  anonymousCards: number;
+  cardsByUsers: number;
 }
 
 interface HistoryEntry {
@@ -44,6 +56,7 @@ interface HistoryEntry {
 
 export default function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [summary, setSummary] = useState<AdminSummary | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -58,6 +71,7 @@ export default function AdminPanel() {
       if (res.ok) {
         const json = await res.json();
         setUsers(json.data);
+        if (json.summary) setSummary(json.summary);
       }
     } finally {
       setLoading(false);
@@ -122,6 +136,49 @@ export default function AdminPanel() {
           Manage users and view learning activity across the platform.
         </p>
       </div>
+
+      {/* Dashboard summary */}
+      {summary && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {[
+            {
+              label: "Total Users",
+              value: summary.totalUsers,
+              icon: <UserCircle2 className="w-4 h-4" />,
+            },
+            {
+              label: "Total Cards",
+              value: summary.totalCards,
+              icon: <Layers className="w-4 h-4" />,
+            },
+            {
+              label: "Cards by Users",
+              value: summary.cardsByUsers,
+              icon: <BookOpen className="w-4 h-4" />,
+            },
+            {
+              label: "Legacy / Anonymous",
+              value: summary.anonymousCards,
+              icon: <Sparkles className="w-4 h-4" />,
+            },
+          ].map(({ label, value, icon }) => (
+            <div
+              key={label}
+              className="bg-white dark:bg-ink-900 rounded-2xl border border-surface-200/80 dark:border-ink-800 shadow-warm p-4"
+            >
+              <div className="flex items-center gap-2 text-surface-400 dark:text-ink-500 mb-1">
+                {icon}
+                <span className="text-[10px] font-semibold uppercase tracking-wide">
+                  {label}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-ink-900 dark:text-surface-100">
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Sub-tabs */}
       <div className="flex gap-2 mb-6">
@@ -193,8 +250,17 @@ export default function AdminPanel() {
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {/* Stats pills */}
-                      <div className="hidden sm:flex items-center gap-2">
-                        <span className="flex items-center gap-1 text-xs text-surface-500 dark:text-ink-400">
+                      <div className="hidden sm:flex items-center gap-3">
+                        <span
+                          className="flex items-center gap-1 text-xs text-surface-500 dark:text-ink-400"
+                          title="Cards created"
+                        >
+                          <Layers className="w-3 h-3" /> {u.stats.cardsCreated}
+                        </span>
+                        <span
+                          className="flex items-center gap-1 text-xs text-surface-500 dark:text-ink-400"
+                          title="Total learning actions"
+                        >
                           <BookOpen className="w-3 h-3" /> {u.stats.totalActions}
                         </span>
                       </div>
@@ -224,8 +290,10 @@ export default function AdminPanel() {
                   {/* Expanded stats */}
                   {expandedUser === u._id && (
                     <div className="px-5 pb-5 border-t border-surface-100 dark:border-ink-800 pt-4">
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
                         {[
+                          { label: "Cards Created", value: u.stats.cardsCreated, icon: <Layers className="w-3.5 h-3.5" /> },
+                          { label: "AI Generated", value: u.stats.aiGenerated, icon: <Sparkles className="w-3.5 h-3.5" /> },
                           { label: "Total Actions", value: u.stats.totalActions, icon: <BookOpen className="w-3.5 h-3.5" /> },
                           { label: "Cards Viewed", value: u.stats.views, icon: <Eye className="w-3.5 h-3.5" /> },
                           { label: "Cards Studied", value: u.stats.studied, icon: <CheckCircle2 className="w-3.5 h-3.5" /> },

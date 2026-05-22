@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Flashcard from "@/models/Flashcard";
+import { getSessionFromRequest } from "@/lib/auth";
 
 /**
  * GET /api/flashcards
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Tag the card with the logged-in creator, if any.
+    const session = getSessionFromRequest(request);
+
     const flashcard = await Flashcard.create({
       question: body.question,
       answer: body.answer,
@@ -67,6 +71,7 @@ export async function POST(request: NextRequest) {
       category: body.category,
       difficulty: body.difficulty || "medium",
       isAIGenerated: body.isAIGenerated || false,
+      createdBy: session?.userId || null,
     });
 
     return NextResponse.json({ success: true, data: flashcard }, { status: 201 });

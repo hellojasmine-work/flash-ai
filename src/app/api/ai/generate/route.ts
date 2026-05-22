@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import connectDB from "@/lib/mongodb";
 import Flashcard from "@/models/Flashcard";
+import { getSessionFromRequest } from "@/lib/auth";
 
 /**
  * POST /api/ai/generate
@@ -74,6 +75,9 @@ Make questions progressively more challenging. Ensure variety in question types 
       );
     }
 
+    // Tag AI-generated cards with the logged-in creator, if any.
+    const session = getSessionFromRequest(request);
+
     // Validate and save each card to the database
     const savedCards = await Promise.all(
       cards.map(
@@ -85,6 +89,7 @@ Make questions progressively more challenging. Ensure variety in question types 
             category: topic,
             difficulty,
             isAIGenerated: true,
+            createdBy: session?.userId || null,
           });
         }
       )
