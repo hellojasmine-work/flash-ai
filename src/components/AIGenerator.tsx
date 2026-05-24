@@ -70,14 +70,14 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
               <Wand2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-ink-500" />
             </div>
             {/* Suggestion chips */}
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-1.5 mt-2.5">
               {suggestions.map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setTopic(s)}
                   disabled={loading}
-                  className="text-xs px-3 py-1.5 rounded-full bg-surface-50 dark:bg-ink-800/60 border border-surface-200/60 dark:border-ink-700/60 text-surface-600 dark:text-ink-300 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                  className="text-[10px] px-2 py-0.5 rounded-full bg-surface-50 dark:bg-ink-800/60 border border-surface-200/60 dark:border-ink-700/60 text-surface-500 dark:text-ink-400 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer"
                 >
                   {s}
                 </button>
