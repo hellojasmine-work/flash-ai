@@ -1,4 +1,6 @@
-# FlashMind AI — AI-Powered Flashcard Learning App
+# FlashMind AI — an AI Flashcard Learning App
+[![Full-Stack: Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![DB: MongoDB](https://img.shields.io/badge/DB-MongoDB-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
 ## Problem Statement
 
