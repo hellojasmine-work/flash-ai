@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FlashMind AI - Smart Flashcard Learning",
+  title: "FlashMind AI",
   description:
     "AI-powered flashcard learning application. Create, study, and master any topic with intelligent flashcard generation and spaced learning.",
   keywords: ["flashcard", "learning", "AI", "study", "education"],
