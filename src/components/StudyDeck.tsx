@@ -193,19 +193,14 @@ export default function StudyDeck({ flashcards, onDiscuss, onStudied }: StudyDec
   }
 
   // ===== DECK STUDY =====
-  const bookColor = getBookColor(selectedCategory);
-
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={handleBack} className="flex items-center gap-1.5 text-sm text-surface-500 dark:text-ink-400 hover:text-ink-700 dark:hover:text-surface-200 font-medium transition-colors cursor-pointer">
+      <div className="relative flex items-center justify-center mb-6">
+        <button onClick={handleBack} className="absolute left-0 flex items-center gap-1.5 text-sm text-surface-500 dark:text-ink-400 hover:text-ink-700 dark:hover:text-surface-200 font-medium transition-colors cursor-pointer">
           <ArrowLeft className="w-4 h-4" />Books
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-5 rounded-[2px]" style={{ backgroundColor: bookColor.cover }} />
-          <span className="font-display text-lg italic text-ink-900 dark:text-surface-100">{selectedCategory}</span>
-        </div>
+        <span className="font-display text-lg italic text-ink-900 dark:text-surface-100">{selectedCategory}</span>
       </div>
 
       {/* Progress */}
