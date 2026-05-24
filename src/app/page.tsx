@@ -12,7 +12,6 @@ import StudyDeck from "@/components/StudyDeck";
 import DiscussPanel from "@/components/DiscussPanel";
 import AuthModal from "@/components/AuthModal";
 import AdminPanel from "@/components/AdminPanel";
-import ProfilePanel from "@/components/ProfilePanel";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import { useAuth } from "@/hooks/useAuth";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
@@ -138,8 +137,7 @@ export default function Home() {
   const handleLogout = async () => {
     await logout();
     toast.success("Signed out");
-    // Bounce away from tabs that require auth
-    if (activeTab === "admin" || activeTab === "profile") setActiveTab("cards");
+    if (activeTab === "admin") setActiveTab("cards");
   };
 
   const hasActiveFilters = filters.difficulty !== "all";
@@ -355,13 +353,6 @@ export default function Home() {
         {activeTab === "ai" && (
           <div className="animate-fade-in py-4">
             <AIGenerator onGenerate={handleAIGenerate} />
-          </div>
-        )}
-
-        {/* ========== PROFILE PANEL ========== */}
-        {activeTab === "profile" && user && (
-          <div className="animate-fade-in py-4">
-            <ProfilePanel user={user} />
           </div>
         )}
 

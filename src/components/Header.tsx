@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sun, Moon, BookOpen, GraduationCap, Wand2, LogIn, LogOut, Shield, UserCircle2 } from "lucide-react";
+import { Sun, Moon, BookOpen, GraduationCap, Wand2, LogIn, LogOut, Shield } from "lucide-react";
 import type { AuthUser } from "@/hooks/useAuth";
 
 interface HeaderProps {
@@ -56,7 +56,6 @@ export default function Header({
     { id: "cards", label: "My Cards", icon: BookOpen },
     { id: "study", label: "Study", icon: GraduationCap },
     { id: "ai", label: "AI Generate", icon: Wand2 },
-    ...(user ? [{ id: "profile", label: "Profile", icon: UserCircle2 }] : []),
     ...(user?.role === "admin" ? [{ id: "admin", label: "Admin", icon: Shield }] : []),
   ];
 
@@ -117,12 +116,6 @@ export default function Header({
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => { onTabChange("profile"); setUserMenuOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-surface-600 dark:text-ink-300 hover:bg-surface-50 dark:hover:bg-ink-800 transition-colors cursor-pointer"
-                    >
-                      <UserCircle2 className="w-4 h-4" /> My Profile
-                    </button>
                     {user.role === "admin" && (
                       <button
                         onClick={() => { onTabChange("admin"); setUserMenuOpen(false); }}

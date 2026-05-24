@@ -41,7 +41,6 @@ Students and self-learners often struggle to create effective study materials ef
 - **Passwords hashed with `bcryptjs`** at 12 salt rounds via a Mongoose pre-save hook — plaintext passwords are never stored
 - **JWT session tokens** signed with `jsonwebtoken`, set as `httpOnly` cookies with a 7-day expiry, immune to XSS exfiltration
 - **`/api/auth/me`** endpoint re-verifies the session on every page load so refresh keeps you signed in
-- **My Profile tab** — read-only username/email/role display and a **Change Password** form with current-password verification
 
 ### Admin tools (role-gated)
 - **Admin tab** only renders when `user.role === "admin"` — both in the navigation and as a server-side guard on every admin API call
@@ -65,7 +64,7 @@ flashcard-app/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx           # Root layout (Toaster, Vercel Analytics, fonts)
-│   │   ├── page.tsx             # Main SPA — all views (cards/study/ai/profile/admin) rendered here
+│   │   ├── page.tsx             # Main SPA — all views (cards/study/ai/admin) rendered here
 │   │   ├── globals.css          # Tailwind layers, animations, design tokens
 │   │   └── api/
 │   │       ├── flashcards/
@@ -78,8 +77,7 @@ flashcard-app/
 │   │       │   ├── register/route.ts        # POST sign-up
 │   │       │   ├── login/route.ts           # POST sign-in
 │   │       │   ├── logout/route.ts          # POST sign-out
-│   │       │   ├── me/route.ts              # GET current session
-│   │       │   └── change-password/route.ts # POST change password (auth required)
+│   │       │   └── me/route.ts              # GET current session
 │   │       ├── view-history/route.ts        # GET list / POST log learning event
 │   │       └── admin/users/route.ts         # GET all users + stats / DELETE user (admin only)
 │   ├── components/
@@ -90,7 +88,6 @@ flashcard-app/
 │   │   ├── AIGenerator.tsx      # AI flashcard generation panel
 │   │   ├── DiscussPanel.tsx     # Per-card AI chat drawer
 │   │   ├── AuthModal.tsx        # Sign in / Sign up modal
-│   │   ├── ProfilePanel.tsx     # My Profile — account info + change password
 │   │   ├── AdminPanel.tsx       # Admin dashboard, user list, activity log
 │   │   └── BookCard.tsx         # 3D book on the shelf
 │   ├── hooks/
@@ -183,7 +180,6 @@ Open http://localhost:3000.
 | POST   | `/api/auth/login`             | Sign in — bcrypt compare + JWT issued  |
 | POST   | `/api/auth/logout`            | Clear the JWT cookie                   |
 | GET    | `/api/auth/me`                | Return the current session user        |
-| POST   | `/api/auth/change-password`   | Change password (verifies current)     |
 
 ### Admin (role-gated)
 | Method | Path                                  | Description                                       |
@@ -206,4 +202,4 @@ Open http://localhost:3000.
 
 ## Challenges Overcome
 
-Building a performant single-page application with Next.js App Router required careful client-side state management to avoid full page reloads — all five views (Cards, Study, AI Generate, Profile, Admin) live inside a single `page.tsx` and switch via React state. The 3D card flip animation needed precise stacking with `transform-style: preserve-3d` and `backface-visibility` to avoid visual glitches across browsers. Integrating the Vercel AI SDK with structured JSON output from GPT-4o-mini required robust parsing with markdown-fence stripping. Managing MongoDB connections in a serverless environment was solved by caching the Mongoose connection on `globalThis` to survive between Vercel Function invocations. Finally, this codebase was merged from two separate repositories (one branch added auth + admin features while the main branch refactored animations and seed data), which was resolved with a careful three-way merge plus history scrubbing to remove a leaked API key surfaced by GitHub's secret-scanning.
+Building a performant single-page application with Next.js App Router required careful client-side state management to avoid full page reloads — all four views (Cards, Study, AI Generate, Admin) live inside a single `page.tsx` and switch via React state. The 3D card flip animation needed precise stacking with `transform-style: preserve-3d` and `backface-visibility` to avoid visual glitches across browsers. Integrating the Vercel AI SDK with structured JSON output from GPT-4o-mini required robust parsing with markdown-fence stripping. Managing MongoDB connections in a serverless environment was solved by caching the Mongoose connection on `globalThis` to survive between Vercel Function invocations. Finally, this codebase was merged from two separate repositories (one branch added auth + admin features while the main branch refactored animations and seed data), which was resolved with a careful three-way merge plus history scrubbing to remove a leaked API key surfaced by GitHub's secret-scanning.
