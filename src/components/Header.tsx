@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Sun, Moon, BookOpen, GraduationCap, Wand2, LogIn, LogOut, Shield } from "lucide-react";
 import type { AuthUser } from "@/hooks/useAuth";
 
@@ -65,7 +66,15 @@ export default function Header({
         {/* Top bar */}
         <div className="flex items-center justify-between h-[72px]">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo.png"
+              alt="FlashMind AI logo"
+              width={36}
+              height={36}
+              priority
+              className="w-9 h-9 object-contain"
+            />
             <h1 className="font-display text-2xl italic text-ink-950 dark:text-surface-50 tracking-tight">
               Flash<span className="gradient-text not-italic">Mind</span> AI
             </h1>
