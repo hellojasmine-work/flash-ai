@@ -129,12 +129,9 @@ export default function AdminPanel() {
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       <div className="mb-8">
-        <h2 className="font-display text-3xl italic text-ink-950 dark:text-surface-50 mb-1">
+        <h2 className="font-display text-3xl italic text-ink-950 dark:text-surface-50">
           Admin Panel
         </h2>
-        <p className="text-sm text-surface-500 dark:text-ink-400">
-          Manage users and view learning activity across the platform.
-        </p>
       </div>
 
       {/* Dashboard summary */}
