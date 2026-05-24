@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo } from "react";
 import { useSpring, useTrail, useTransition, animated } from "@react-spring/web";
 import {
   ChevronLeft,
-  ChevronRight,
   RotateCcw,
   CheckCircle2,
   Sparkles,
@@ -92,13 +91,6 @@ export default function StudyDeck({ flashcards, onDiscuss, onStudied }: StudyDec
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
   }, []);
-
-  const handleNext = useCallback(() => {
-    setIsFlipped(false);
-    if (currentIndex < studyQueue.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    }
-  }, [currentIndex, studyQueue.length]);
 
   const handlePrev = useCallback(() => {
     setIsFlipped(false);
@@ -247,11 +239,6 @@ export default function StudyDeck({ flashcards, onDiscuss, onStudied }: StudyDec
               />
             );
           })}
-          {completed.length > 0 && (
-            <div className="absolute -bottom-6 left-0 right-0 text-center">
-              <span className="text-[10px] font-semibold text-sage-600 dark:text-sage-400 tabular-nums">{completed.length} done</span>
-            </div>
-          )}
         </div>
 
         {/* Active deck */}
@@ -344,20 +331,13 @@ export default function StudyDeck({ flashcards, onDiscuss, onStudied }: StudyDec
 
         <button onClick={handleMarkStudied}
           className="px-7 py-3 rounded-full bg-sage-600 hover:bg-sage-700 active:scale-[0.97] text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-warm cursor-pointer focus:outline-none focus:ring-2 focus:ring-sage-500/30 focus:ring-offset-2">
-          <CheckCircle2 className="w-4 h-4" />Got it!
+          <CheckCircle2 className="w-4 h-4" />Nailed it!
         </button>
 
-        <button onClick={handleNext} disabled={currentIndex >= studyQueue.length - 1}
-          className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
-          aria-label="Next card">
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="text-center mt-5">
         <button onClick={handleReset}
-          className="text-xs text-surface-400 hover:text-surface-600 dark:text-ink-500 dark:hover:text-ink-300 transition-colors flex items-center gap-1.5 mx-auto font-medium cursor-pointer">
-          <RotateCcw className="w-3 h-3" />Reset session
+          className="w-12 h-12 rounded-full border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-500 hover:text-ink-700 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-ink-800 transition-all cursor-pointer"
+          aria-label="Reset session">
+          <RotateCcw className="w-5 h-5" />
         </button>
       </div>
     </div>
