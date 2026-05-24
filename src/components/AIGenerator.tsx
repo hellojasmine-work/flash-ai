@@ -32,25 +32,22 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
 
   const suggestions = [
     "JavaScript Closures",
-    "React Hooks",
-    "Python Data Structures",
-    "SQL Joins",
-    "Machine Learning Basics",
-    "CSS Flexbox & Grid",
-    "REST API Design",
-    "Git Version Control",
+    "Spanish Vocabulary",
+    "World Capitals",
+    "Photosynthesis",
+    "French Verb Conjugation",
+    "Music Theory",
+    "Calculus Derivatives",
+    "Ancient Roman History",
   ];
 
   return (
     <div className="max-w-xl mx-auto">
       {/* Hero */}
       <div className="text-center mb-10">
-        <h2 className="font-display text-3xl sm:text-4xl italic text-ink-950 dark:text-surface-50 mb-3">
+        <h2 className="font-display text-3xl sm:text-4xl italic text-ink-950 dark:text-surface-50">
           Generate with AI
         </h2>
-        <p className="text-surface-500 dark:text-ink-400 text-sm max-w-md mx-auto leading-relaxed">
-          Enter a topic and let AI create flashcards with questions, answers, and explanations.
-        </p>
       </div>
 
       {/* Form */}
@@ -66,11 +63,25 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g., JavaScript Promises"
+                placeholder="Enter a topic and let AI create flashcards…"
                 className="input-field !pr-10"
                 disabled={loading}
               />
               <Wand2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-ink-500" />
+            </div>
+            {/* Suggestion chips */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setTopic(s)}
+                  disabled={loading}
+                  className="text-xs px-3 py-1.5 rounded-full bg-surface-50 dark:bg-ink-800/60 border border-surface-200/60 dark:border-ink-700/60 text-surface-600 dark:text-ink-300 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                >
+                  {s}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -138,24 +149,6 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
         </div>
       </form>
 
-      {/* Suggestions */}
-      <div className="mt-8">
-        <p className="text-[11px] font-semibold text-surface-400 dark:text-ink-500 mb-3 text-center uppercase tracking-widest">
-          Try a topic
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {suggestions.map((s) => (
-            <button
-              key={s}
-              onClick={() => setTopic(s)}
-              disabled={loading}
-              className="text-xs px-3.5 py-2 rounded-full bg-white dark:bg-ink-900 border border-surface-200 dark:border-ink-800 text-surface-600 dark:text-ink-300 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer shadow-warm-sm"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
