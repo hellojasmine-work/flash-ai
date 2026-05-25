@@ -84,18 +84,16 @@ export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss, onVie
                 <Pencil className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={async (e) => {
-                    e.stopPropagation();
-                  
-                    const confirmed = window.confirm(
-                      "Are you sure you want to delete this flashcard?"
-                    );
-                  
-                    if (!confirmed) return;
-                  
-                    await onDelete(card._id);
-                  }}
+                onClick={(e) => { e.stopPropagation(); onDelete(card._id); }}
+                className="w-8 h-8 rounded-full bg-surface-50 dark:bg-ink-800 border border-surface-200 dark:border-ink-700 flex items-center justify-center text-surface-400 hover:text-accent-600 dark:hover:text-accent-400 hover:border-accent-300 dark:hover:border-accent-700 transition-all cursor-pointer"
+                aria-label="Delete flashcard"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
+            </div>
+          </div>
+
+
             </div>
           </div>
 
