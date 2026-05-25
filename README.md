@@ -207,8 +207,8 @@ Open http://localhost:3000.
 
 | Member | Responsibilities |
 |--------|-----------------|
-| **Katherine** | `StudyDeck.tsx` · `StudyMode.tsx` · `AdminPanel.tsx` · `ViewHistory` model · `api/view-history` · `api/admin/users` |
-| **Hedy** | `AuthModal.tsx` · `useAuth.ts` · `lib/auth.ts` · `lib/mongodb.ts` · `User` model · `api/auth/` |
+| **Katherine** | `StudyDeck.tsx` · `AdminPanel.tsx` · `ViewHistory` model · `api/view-history` · `api/admin/users` · `api/flashcards/route.ts` (user isolation fix) · `page.tsx` (refetch on auth) |
+| **Hedy** | `AuthModal.tsx` · `ProfileModal.tsx` · `useAuth.ts` · `lib/auth.ts` · `lib/mongodb.ts` · `User` model · `api/auth/` |
 | **Prachi** | `FlashcardCard.tsx` · `BookCard.tsx` · `CreateEditModal.tsx` · `Flashcard` model · `api/flashcards/` |
 | **Jasmine** | `AIGenerator.tsx` · `DiscussPanel.tsx` · `api/ai/generate` · `api/flashcards/[id]/discuss` |
 | **May** | `page.tsx` · `Header.tsx` · `useFlashcards.ts` · `StudyMode.tsx` · `layout.tsx` · `globals.css` · `tailwind.config.ts` |
