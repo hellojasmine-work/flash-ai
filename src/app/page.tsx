@@ -372,7 +372,7 @@ export default function Home() {
         <ProfileModal
           user={user}
           onClose={() => setShowProfileModal(false)}
-          onUpdate={updateProfile}
+          onUpdate={async (data) => { await updateProfile(data); }}
         />
       )}
 
