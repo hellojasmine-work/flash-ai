@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner"}
+import { toast } from "sonner"};
 import { useSpring, animated } from "@react-spring/web";
 import { Pencil, Trash2, Sparkles, MessageCircle } from "lucide-react";
 import type { Flashcard } from "@/hooks/useFlashcards";
