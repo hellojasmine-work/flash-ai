@@ -93,10 +93,6 @@ export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss, onVie
             </div>
           </div>
 
-
-            </div>
-          </div>
-
           {/* Back */}
           <div className="card-back absolute inset-0 rounded-2xl bg-ink-950 dark:bg-surface-100 shadow-card dark:shadow-dark-card p-5 flex flex-col">
             <div className="flex items-center justify-between mb-4">
