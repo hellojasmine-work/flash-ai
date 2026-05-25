@@ -12,6 +12,7 @@ import StudyDeck from "@/components/StudyDeck";
 import DiscussPanel from "@/components/DiscussPanel";
 import AuthModal from "@/components/AuthModal";
 import AdminPanel from "@/components/AdminPanel";
+import ProfileModal from "@/components/ProfileModal";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import { useAuth } from "@/hooks/useAuth";
 import type { Flashcard, FlashcardInput } from "@/hooks/useFlashcards";
@@ -32,7 +33,7 @@ export default function Home() {
     syncCardNotes,
   } = useFlashcards();
 
-  const { user, loading: authLoading, login, register, logout, logHistory } = useAuth();
+  const { user, loading: authLoading, login, register, logout, logHistory, updateProfile } = useAuth();
 
   const [activeTab, setActiveTab] = useState("cards");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,6 +43,7 @@ export default function Home() {
   const [discussCard, setDiscussCard] = useState<Flashcard | null>(null);
   const [openBook, setOpenBook] = useState<string | null>(null);
   const [showDiffFilter, setShowDiffFilter] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Group flashcards by category into "books"
   const bookGroups = useMemo(() => {
@@ -155,6 +157,7 @@ export default function Home() {
         authLoading={authLoading}
         onLoginClick={() => setShowAuthModal(true)}
         onLogout={handleLogout}
+        onProfileClick={() => setShowProfileModal(true)}
       />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-5 sm:px-8 py-8">
@@ -363,6 +366,15 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* Profile Modal */}
+      {showProfileModal && user && (
+        <ProfileModal
+          user={user}
+          onClose={() => setShowProfileModal(false)}
+          onUpdate={updateProfile}
+        />
+      )}
 
       {/* Auth Modal */}
       <AuthModal

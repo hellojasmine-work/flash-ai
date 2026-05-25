@@ -83,5 +83,21 @@ export function useAuth() {
     [user]
   );
 
-  return { user, loading, register, login, logout, logHistory, refetch: fetchMe };
+  const updateProfile = async (data: {
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => {
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    setUser(json.data);
+    return json.data as AuthUser;
+  };
+
+  return { user, loading, register, login, logout, logHistory, updateProfile, refetch: fetchMe };
 }

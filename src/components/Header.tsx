@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sun, Moon, BookOpen, GraduationCap, Wand2, LogIn, LogOut, Shield } from "lucide-react";
+import { Sun, Moon, BookOpen, GraduationCap, Wand2, LogIn, LogOut, Shield, UserCog } from "lucide-react";
 import type { AuthUser } from "@/hooks/useAuth";
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
   authLoading: boolean;
   onLoginClick: () => void;
   onLogout: () => void;
+  onProfileClick: () => void;
 }
 
 export default function Header({
@@ -23,6 +24,7 @@ export default function Header({
   authLoading,
   onLoginClick,
   onLogout,
+  onProfileClick,
 }: HeaderProps) {
   const [darkMode, setDarkMode] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -125,6 +127,12 @@ export default function Header({
                         </span>
                       )}
                     </div>
+                    <button
+                      onClick={() => { onProfileClick(); setUserMenuOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-surface-600 dark:text-ink-300 hover:bg-surface-50 dark:hover:bg-ink-800 transition-colors cursor-pointer"
+                    >
+                      <UserCog className="w-4 h-4" /> Edit Profile
+                    </button>
                     <button
                       onClick={() => { onLogout(); setUserMenuOpen(false); }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-surface-600 dark:text-ink-300 hover:bg-surface-50 dark:hover:bg-ink-800 transition-colors cursor-pointer"
