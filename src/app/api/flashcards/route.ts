@@ -1,85 +1,87 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Flashcard from "@/models/Flashcard";
-import mongoose from "mongoose";
+import { getSessionFromRequest } from "@/lib/auth";
 
 /**
- * GET /api/flashcards/:id
- * Retrieve a single flashcard by ID.
+ * GET /api/flashcards
+ * Retrieve all flashcards, optionally filtered by category or difficulty.
+ * Supports query params: ?category=X&difficulty=Y&search=Z
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    // Validate ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid flashcard ID" },
-        { status: 400 }
-      );
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const difficulty = searchParams.get("difficulty");
+    const search = searchParams.get("search");
+
+    // Scope cards by user: logged in → own cards, logged out → demo cards (createdBy: null)
+    const session = getSessionFromRequest(request);
+
+    // Build dynamic filter
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: any = {};
+    filter.createdBy = session ? session.userId : null;
+    if (category && category !== "all") filter.category = category;
+    if (difficulty && difficulty !== "all") filter.difficulty = difficulty;
+    if (search) {
+      filter.$or = [
+        { question: { $regex: search, $options: "i" } },
+        { answer: { $regex: search, $options: "i" } },
+      ];
     }
 
-    const flashcard = await Flashcard.findById(params.id);
+    const flashcards = await Flashcard.find(filter).sort({ createdAt: -1 });
 
-    if (!flashcard) {
-      return NextResponse.json(
-        { success: false, error: "Flashcard not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: flashcard }, { status: 200 });
+    return NextResponse.json({ success: true, data: flashcards }, { status: 200 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Server error";
-    console.error("GET /api/flashcards/:id error:", message);
+    console.error("GET /api/flashcards error:", message);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch flashcard" },
+      { success: false, error: "Failed to fetch flashcards" },
       { status: 500 }
     );
   }
 }
 
 /**
- * PUT /api/flashcards/:id
- * Update an existing flashcard.
- * Body: { question?, answer?, explanation?, category?, difficulty? }
+ * POST /api/flashcards
+ * Create a new flashcard.
+ * Body: { question, answer, explanation?, category, difficulty?, isAIGenerated? }
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    const body = await request.json();
+
+    // Validate required fields
+    if (!body.question || !body.answer || !body.category) {
       return NextResponse.json(
-        { success: false, error: "Invalid flashcard ID" },
+        { success: false, error: "Question, answer, and category are required" },
         { status: 400 }
       );
     }
 
-    const body = await request.json();
+    // Tag the card with the logged-in creator, if any.
+    const session = getSessionFromRequest(request);
 
-    const flashcard = await Flashcard.findByIdAndUpdate(
-      params.id,
-      { $set: body },
-      { new: true, runValidators: true }
-    );
+    const flashcard = await Flashcard.create({
+      question: body.question,
+      answer: body.answer,
+      explanation: body.explanation || "",
+      category: body.category,
+      difficulty: body.difficulty || "medium",
+      isAIGenerated: body.isAIGenerated || false,
+      createdBy: session?.userId || null,
+    });
 
-    if (!flashcard) {
-      return NextResponse.json(
-        { success: false, error: "Flashcard not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: flashcard }, { status: 200 });
+    return NextResponse.json({ success: true, data: flashcard }, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Server error";
-    console.error("PUT /api/flashcards/:id error:", message);
+    console.error("POST /api/flashcards error:", message);
 
     if (error instanceof Error && error.name === "ValidationError") {
       return NextResponse.json(
@@ -89,48 +91,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { success: false, error: "Failed to update flashcard" },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * DELETE /api/flashcards/:id
- * Delete a flashcard by ID.
- */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    await connectDB();
-
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid flashcard ID" },
-        { status: 400 }
-      );
-    }
-
-    const flashcard = await Flashcard.findByIdAndDelete(params.id);
-
-    if (!flashcard) {
-      return NextResponse.json(
-        { success: false, error: "Flashcard not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: true, message: "Flashcard deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Server error";
-    console.error("DELETE /api/flashcards/:id error:", message);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete flashcard" },
+      { success: false, error: "Failed to create flashcard" },
       { status: 500 }
     );
   }
