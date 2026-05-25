@@ -31,6 +31,7 @@ export default function Home() {
     generateWithAI,
     discussWithAI,
     syncCardNotes,
+    refetch,
   } = useFlashcards();
 
   const { user, loading: authLoading, login, register, logout, logHistory, updateProfile } = useAuth();
@@ -128,16 +129,19 @@ export default function Home() {
 
   const handleLogin = async (email: string, password: string) => {
     await login(email, password);
+    await refetch();
     toast.success("Welcome back!");
   };
 
   const handleRegister = async (username: string, email: string, password: string) => {
     await register(username, email, password);
+    await refetch();
     toast.success("Account created!");
   };
 
   const handleLogout = async () => {
     await logout();
+    await refetch();
     toast.success("Signed out");
     if (activeTab === "admin") setActiveTab("cards");
   };
