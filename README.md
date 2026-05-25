@@ -77,7 +77,8 @@ flashcard-app/
 │   │       │   ├── register/route.ts        # POST sign-up
 │   │       │   ├── login/route.ts           # POST sign-in
 │   │       │   ├── logout/route.ts          # POST sign-out
-│   │       │   └── me/route.ts              # GET current session
+│   │       │   ├── me/route.ts              # GET current session
+│   │       │   └── profile/route.ts         # PATCH update email / password
 │   │       ├── view-history/route.ts        # GET list / POST log learning event
 │   │       └── admin/users/route.ts         # GET all users + stats / DELETE user (admin only)
 │   ├── components/
@@ -88,6 +89,7 @@ flashcard-app/
 │   │   ├── AIGenerator.tsx      # AI flashcard generation panel
 │   │   ├── DiscussPanel.tsx     # Per-card AI chat drawer
 │   │   ├── AuthModal.tsx        # Sign in / Sign up modal
+│   │   ├── ProfileModal.tsx     # Edit email / change password modal
 │   │   ├── AdminPanel.tsx       # Admin dashboard, user list, activity log
 │   │   └── BookCard.tsx         # 3D book on the shelf
 │   ├── hooks/
@@ -180,6 +182,7 @@ Open http://localhost:3000.
 | POST   | `/api/auth/login`             | Sign in — bcrypt compare + JWT issued  |
 | POST   | `/api/auth/logout`            | Clear the JWT cookie                   |
 | GET    | `/api/auth/me`                | Return the current session user        |
+| PATCH  | `/api/auth/profile`           | Update email or password               |
 
 ### Admin (role-gated)
 | Method | Path                                  | Description                                       |
@@ -199,6 +202,16 @@ Open http://localhost:3000.
 - **Session tokens are JWTs signed with a server-side secret**, stored as `httpOnly` cookies so JavaScript on the page cannot read them — defends against XSS token theft. Cookies are marked `Secure` in production and `SameSite=Lax`.
 - **Admin actions verify role on the server** — the frontend's hidden Admin tab is a UX hint, not a security boundary. Every admin endpoint re-checks `session.role === "admin"` and returns 403 otherwise.
 - **Input validation runs on both sides** — client-side for immediate feedback, server-side via Mongoose schema validators (regex on emails, length checks, enum constraints).
+
+## Team
+
+| Member | Responsibilities |
+|--------|-----------------|
+| **Katherine** | `StudyDeck.tsx` · `StudyMode.tsx` · `AdminPanel.tsx` · `ViewHistory` model · `api/view-history` · `api/admin/users` |
+| **Hedy** | `AuthModal.tsx` · `useAuth.ts` · `lib/auth.ts` · `lib/mongodb.ts` · `User` model · `api/auth/` |
+| **Prachi** | `FlashcardCard.tsx` · `BookCard.tsx` · `CreateEditModal.tsx` · `Flashcard` model · `api/flashcards/` |
+| **Jasmine** | `AIGenerator.tsx` · `DiscussPanel.tsx` · `api/ai/generate` · `api/flashcards/[id]/discuss` |
+| **May** | `page.tsx` · `Header.tsx` · `useFlashcards.ts` · `StudyMode.tsx` · `layout.tsx` · `globals.css` · `tailwind.config.ts` |
 
 ## Challenges Overcome
 
