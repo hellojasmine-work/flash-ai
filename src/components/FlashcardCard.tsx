@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner"};
 import { useSpring, animated } from "@react-spring/web";
 import { Pencil, Trash2, Sparkles, MessageCircle } from "lucide-react";
 import type { Flashcard } from "@/hooks/useFlashcards";
@@ -94,12 +93,7 @@ export default function FlashcardCard({ card, onEdit, onDelete, onDiscuss, onVie
                   
                     if (!confirmed) return;
                   
-                    try {
-                      await onDelete(card._id);
-                      toast.success("Flashcard deleted successfully");
-                    } catch {
-                      toast.error("Failed to delete flashcard");
-                    }
+                    await onDelete(card._id);
                   }}
               </button>
             </div>
