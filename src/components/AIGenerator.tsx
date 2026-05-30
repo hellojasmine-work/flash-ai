@@ -77,7 +77,7 @@ export default function AIGenerator({ onGenerate }: AIGeneratorProps) {
                   type="button"
                   onClick={() => setTopic(s)}
                   disabled={loading}
-                  className="text-[8px] px-2 py-0.5 rounded-full bg-surface-50 dark:bg-ink-800/60 border border-surface-200/60 dark:border-ink-700/60 text-surface-500 dark:text-ink-400 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer"
+                  className="text-[9px] px-2 py-0.5 rounded-full bg-surface-50 dark:bg-ink-800/60 border border-surface-200/60 dark:border-ink-700/60 text-surface-500 dark:text-ink-400 font-medium hover:border-accent-300 dark:hover:border-accent-700 hover:text-accent-700 dark:hover:text-accent-300 transition-all duration-200 disabled:opacity-40 cursor-pointer"
                 >
                   {s}
                 </button>
