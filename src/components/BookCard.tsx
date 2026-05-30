@@ -87,7 +87,7 @@ export default function BookCard({ category, cards, onClick, index }: BookCardPr
             <div className="w-12 h-[1px] opacity-30" style={{ backgroundColor: color.text }} />
 
             <div className="flex-1 flex flex-col justify-center">
-              <h3 className="font-display text-xl sm:text-2xl italic leading-tight mb-2 min-h-[2.5em] flex items-center" style={{ color: color.text }}>
+              <h3 className="font-display text-base sm:text-lg italic leading-tight mb-2 min-h-[2.5em] flex items-center" style={{ color: color.text }}>
                 {category}
               </h3>
               <div className="flex items-center gap-1.5" style={{ color: color.text, opacity: 0.6 }}>
